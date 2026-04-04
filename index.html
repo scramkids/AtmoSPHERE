@@ -115,10 +115,18 @@ main{flex:1;padding:14px 14px calc(var(--navh) + env(safe-area-inset-bottom) + 8
 .piname{font-size:11px;color:var(--tx2)}.pival{font-size:11px}.piunit{font-size:9px;color:var(--tx3)}
 
 /* LOG */
-.erow{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:9px}
-.ebtn{width:36px;height:36px;border-radius:7px;border:2px solid var(--bdr);background:var(--bg2);font-size:19px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s}
-.ebtn:hover{background:var(--bg3);transform:scale(1.06)}
+.erow{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px}
+.ebtn{
+  width:48px;display:flex;flex-direction:column;align-items:center;
+  padding:6px 2px 5px;gap:3px;
+  border-radius:8px;border:2px solid var(--bdr);background:var(--bg2);
+  cursor:pointer;transition:all .15s;
+}
+.ebtn:hover{background:var(--bg3);transform:scale(1.04)}
 .ebtn.sel{border-color:var(--ac);background:rgba(200,90,42,.1)}
+.ebtn .ei{font-size:20px;line-height:1}
+.ebtn .el{font-size:8px;color:var(--tx3);letter-spacing:.2px;text-align:center;line-height:1.2;white-space:nowrap}
+.ebtn.sel .el{color:var(--ac)}
 .lnote{width:100%;padding:8px 10px;background:var(--bg2);border:1px solid var(--bdr);border-radius:7px;font-family:'DM Mono',monospace;font-size:12px;color:var(--tx);resize:none;outline:none;margin-bottom:8px;transition:border-color .2s}
 .lnote:focus{border-color:var(--ac)}
 .lbtn{width:100%;padding:10px;background:var(--ac);border:none;border-radius:7px;color:#fff;font-family:'DM Mono',monospace;font-size:12px;cursor:pointer}
@@ -130,10 +138,10 @@ main{flex:1;padding:14px 14px calc(var(--navh) + env(safe-area-inset-bottom) + 8
 .llist::-webkit-scrollbar-thumb{background:var(--bdr);border-radius:2px}
 /* Log entry — actions always visible on expand */
 .le{background:var(--bg2);border:1px solid var(--bdr);border-radius:7px;padding:8px;font-size:11px}
-.letop{display:flex;align-items:center;gap:6px;margin-bottom:3px}
-.leems{font-size:15px;letter-spacing:1px}
-.lets{font-size:9px;color:var(--tx3);margin-left:auto}
-.lenote{color:var(--tx2);line-height:1.4;margin-bottom:4px}
+.letop{display:flex;align-items:baseline;gap:7px;margin-bottom:4px;flex-wrap:wrap}
+.leems{font-size:14px;letter-spacing:2px;flex-shrink:0}
+.lenote{color:var(--tx2);line-height:1.4;flex:1;min-width:0;word-break:break-word}
+.lets{font-size:9px;color:var(--tx3);margin-left:auto;white-space:nowrap;flex-shrink:0}
 .lechips{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:6px}
 .lechip{font-size:9px;padding:2px 5px;background:var(--bg);border:1px solid var(--bdr);border-radius:3px;color:var(--tx3)}
 /* Actions always visible — no expand needed */
@@ -638,7 +646,8 @@ function nwsIcon(desc, isDaytime) {
   return isDaytime ? '🌤️' : '🌙';
 }
 
-// AirNow — direct call (AirNow sends Access-Control-Allow-Origin: * from HTTPS origins)
+// AirNow — AirNow blocks direct browser CORS requests.
+// We use corsproxy.io which adds the required CORS headers.
 async function fetchAQ(){
   const{lat,lng}=S;
   if(!S.keys.airnow){
@@ -648,14 +657,15 @@ async function fetchAQ(){
   }
   diagSet('aq','loading','Fetching…');
   try{
-    const url=
+    const direct=
       `https://www.airnowapi.org/aq/observation/latLong/current/?format=application/json`+
       `&latitude=${lat}&longitude=${lng}&distance=25&API_KEY=${S.keys.airnow}`;
+    const url=`https://corsproxy.io/?url=${encodeURIComponent(direct)}`;
     const r=await fetch(url);
     if(!r.ok) throw new Error(`AirNow HTTP ${r.status}`);
     const data=await r.json();
-    if(!Array.isArray(data)) throw new Error('Unexpected AirNow response');
-    if(data.length===0) throw new Error('No AirNow observations within 25 mi of this location');
+    if(!Array.isArray(data)) throw new Error('Unexpected AirNow response format');
+    if(data.length===0) throw new Error('No AirNow observations within 25 mi');
     diagSet('aq','ok','AirNow ✓');
     renderAQ(data);
   }catch(e){
@@ -920,6 +930,7 @@ function renderPollen(data,source){
   }
 
   if(!types.length){showCardErr('poll','No pollen data for this location');return;}
+  S.pollenTypes=types; // cache for captureCond
   const hasH=types.some(t=>t.idx>=4),hasM=types.some(t=>t.idx>=3);
   const badgeCls=hasH?'badge bb':hasM?'badge bw':'badge bg';
   const badgeTxt=hasH?'High':hasM?'Moderate':'Low';
@@ -950,7 +961,7 @@ function buildLogUI(bodyId,erId,noteId,btnId,okId,listId){
   el.innerHTML=`
     <div class="erow" id="${erId}"></div>
     <textarea class="lnote" id="${noteId}" rows="2" placeholder="Optional note…"></textarea>
-    <button class="lbtn" id="${btnId}">Log current conditions</button>
+    <button class="lbtn" id="${btnId}">Log this moment</button>
     <div class="lok" id="${okId}">&#10003; Saved!</div>
     <div class="lhdr">Recent entries</div>
     <div class="llist" id="${listId}"></div>`;
@@ -984,9 +995,13 @@ function renderList(listId){
   el.innerHTML=sorted.map(e=>{
     const dt=new Date(e.ts);
     const ts=dt.toLocaleString('en-US',{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'});
+    const noteHtml=e.note?`<span class="lenote">${esc(e.note)}</span>`:'';
     return`<div class="le" data-id="${e.id}">
-      <div class="letop"><span class="leems">${(e.emojis||[]).join('')}</span><span class="lets">${ts}</span></div>
-      ${e.note?`<div class="lenote">${esc(e.note)}</div>`:''}
+      <div class="letop">
+        <span class="leems">${(e.emojis||[]).join('')}</span>
+        ${noteHtml}
+        <span class="lets">${ts}</span>
+      </div>
       <div class="lechips">${condChips(e.cond)}</div>
       <div class="leact">
         <button class="abtn" data-a="edit" data-id="${e.id}">Edit</button>
@@ -1006,11 +1021,13 @@ function renderList(listId){
 
 function buildEmojiPicker(id,selSet){
   const el=document.getElementById(id); if(!el)return;
-  el.innerHTML=EMOJIS.map(({e,l})=>`<button class="ebtn${selSet.has(e)?' sel':''}" data-e="${e}" title="${l}">${e}</button>`).join('');
+  el.innerHTML=EMOJIS.map(({e,l})=>
+    `<button class="ebtn${selSet.has(e)?' sel':''}" data-e="${e}" title="${l}">` +
+    `<span class="ei">${e}</span><span class="el">${l}</span></button>`
+  ).join('');
   el.querySelectorAll('.ebtn').forEach(b=>b.addEventListener('click',()=>{
     const em=b.dataset.e;
     if(selSet.has(em))selSet.delete(em); else selSet.add(em);
-    // Sync all pickers
     document.querySelectorAll(`.ebtn[data-e="${em}"]`).forEach(x=>x.classList.toggle('sel',selSet.has(em)));
   }));
 }
@@ -1018,31 +1035,76 @@ function buildEmojiPicker(id,selSet){
 function condChips(c){
   if(!c)return'';
   const ch=[];
+  // Temperature
   if(c.tempF!=null||c.tempC!=null){
     const disp=S.useFahrenheit
       ? (c.tempF!=null ? Math.round(c.tempF)+'°F' : Math.round(c.tempC*9/5+32)+'°F')
       : (c.tempC!=null ? Math.round(c.tempC)+'°C'  : Math.round((c.tempF-32)*5/9)+'°C');
-    ch.push('&#127777; '+disp);
+    ch.push('&#127777;'+disp);
   }
-  if(c.aqi!=null)ch.push('AQI '+c.aqi);
-  if(c.humidity!=null)ch.push(c.humidity+'% RH');
-  if(c.uv!=null)ch.push('UV '+c.uv);
+  if(c.humidity!=null)   ch.push(c.humidity+'% RH');
+  if(c.windMph!=null)    ch.push('&#128168;'+Math.round(c.windMph)+' mph');
+  if(c.uv!=null)         ch.push('UV '+c.uv+(c.uvLabel?' '+c.uvLabel:''));
+  if(c.aqiOverall!=null) ch.push('AQI '+c.aqiOverall+(c.aqiCategory?' · '+c.aqiCategory:''));
+  if(c.pollen?.length){
+    const worst=c.pollen.reduce((a,b)=>b.index>a.index?b:a);
+    if(worst.index>0) ch.push('&#127807; '+worst.name+' '+worst.category);
+  }
+  if(c.weatherDesc)      ch.push(c.weatherDesc);
   return ch.map(t=>`<span class="lechip">${t}</span>`).join('');
 }
 
 function captureCond(){
   const c={};
+
+  // ── Weather (NWS) ──
   if(S.weather){
-    // Support both NWS shape and legacy Open-Meteo shape
     const w=S.weather;
-    c.tempF   = w.tempF   ?? (w.temperature_2m!=null ? Math.round(w.temperature_2m*9/5+32) : null);
-    c.tempC   = w.tempC   ?? w.temperature_2m ?? null;
-    c.humidity= w.humidity ?? w.relative_humidity_2m ?? null;
-    c.wind    = w.windMph  ?? w.wind_speed_10m ?? null;
-    c.uv      = w.uv       ?? w.uv_index ?? null;
-    c.weatherDesc = w.desc ?? (w.weather_code!=null ? wDesc(w.weather_code) : '');
+    c.tempF        = w.tempF   ?? (w.temperature_2m!=null ? +(w.temperature_2m*9/5+32).toFixed(1) : null);
+    c.tempC        = w.tempC   != null ? +w.tempC.toFixed(1) : (w.temperature_2m!=null ? +w.temperature_2m.toFixed(1) : null);
+    c.feelsLikeF   = w.feelsF  ?? null;
+    c.feelsLikeC   = w.feelsC  ?? null;
+    c.humidity     = w.humidity ?? w.relative_humidity_2m ?? null;
+    c.windMph      = w.windMph  ?? w.wind_speed_10m ?? null;
+    c.windDir      = w.windDir  ?? null;
+    c.pressureHpa  = w.pressHpa ?? null;
+    c.visibilityM  = w.visM     ?? null;
+    c.uv           = w.uv       ?? w.uv_index ?? null;
+    c.uvLabel      = c.uv!=null ? (c.uv<=2?'Low':c.uv<=5?'Moderate':c.uv<=7?'High':c.uv<=10?'Very High':'Extreme') : null;
+    c.dewPointC    = w.dewC     ?? null;
+    c.dewPointF    = c.dewPointC!=null ? +(c.dewPointC*9/5+32).toFixed(1) : null;
+    c.weatherDesc  = w.desc     ?? (w.weather_code!=null ? wDesc(w.weather_code) : null);
+    c.isDaytime    = w.isDaytime ?? null;
+    c.obsTime      = w.startTime ?? new Date().toISOString();
   }
-  if(S.aq?.length){const top=S.aq.reduce((a,b)=>b.AQI>a.AQI?b:a);c.aqi=top.AQI;c.aqCat=top.Category?.Name;}
+
+  // ── Air Quality (AirNow) ──
+  if(S.aq?.length){
+    const top=S.aq.reduce((a,b)=>b.AQI>a.AQI?b:a);
+    c.aqiOverall   = top.AQI;
+    c.aqiCategory  = top.Category?.Name ?? null;
+    // All individual pollutants
+    c.pollutants   = S.aq.map(o=>({
+      name: o.ParameterName,
+      aqi:  o.AQI,
+      cat:  o.Category?.Name ?? null,
+    }));
+  }
+
+  // ── Pollen (Open-Meteo or Google) ──
+  if(S.pollen){
+    // Store raw pollen state reference — types array reconstructed from last render
+    // We store the parsed types array on S.pollenTypes during renderPollen
+    if(S.pollenTypes?.length){
+      c.pollen = S.pollenTypes.map(t=>({
+        name:     t.name,
+        index:    t.idx,
+        category: t.cat,
+        raw:      t.raw ?? null,
+      }));
+    }
+  }
+
   return c;
 }
 
