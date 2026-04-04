@@ -193,6 +193,19 @@ main{flex:1;padding:14px 14px calc(var(--navh) + env(safe-area-inset-bottom) + 8
 .dval{color:var(--tx2)}
 .dval.ok{color:var(--good)}.dval.err{color:var(--bad)}.dval.loading{color:var(--warn)}
 
+
+/* SETTINGS SOURCE BLOCKS */
+.stsource{background:var(--bg2);border:1px solid var(--bdr);border-radius:9px;padding:12px 13px;margin-bottom:10px}
+.stsource-hdr{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.stsource-name{font-size:11px;font-weight:500;color:var(--tx2)}
+.stbadge{font-size:10px;padding:2px 8px;border-radius:20px;white-space:nowrap;flex-shrink:0}
+.stok  {background:rgba(42,156,90,.12);color:var(--good);border:1px solid rgba(42,156,90,.25)}
+.sterr {background:rgba(200,42,42,.12);color:var(--bad); border:1px solid rgba(200,42,42,.25)}
+.stload{background:var(--bg3);         color:var(--tx3); border:1px solid var(--bdr)}
+
+/* Remove old diagbar styles (kept for safety, now hidden) */
+.diagbar{display:none}
+
 @keyframes fu{from{opacity:0;transform:translateY(9px)}to{opacity:1;transform:translateY(0)}}
 .card{animation:fu .3s ease both}
 .mpanel .card{animation:fu .25s ease both}
@@ -210,15 +223,6 @@ main{flex:1;padding:14px 14px calc(var(--navh) + env(safe-area-inset-bottom) + 8
 </header>
 
 <main>
-  <!-- DIAGNOSTIC BAR (shown on error) -->
-  <div class="diagbar" id="diagbar">
-    <div style="font-size:10px;text-transform:uppercase;letter-spacing:1.5px;color:var(--tx3);margin-bottom:6px">Data sources</div>
-    <div class="drow"><span class="dlbl">Weather</span><span class="dval loading" id="ds-weather">Loading…</span></div>
-    <div class="drow"><span class="dlbl">Forecast</span><span class="dval loading" id="ds-forecast">Loading…</span></div>
-    <div class="drow"><span class="dlbl">Air Quality</span><span class="dval loading" id="ds-aq">Loading…</span></div>
-    <div class="drow"><span class="dlbl">Pollen</span><span class="dval loading" id="ds-pollen">Loading…</span></div>
-  </div>
-
   <!-- DESKTOP GRID -->
   <div class="dgrid">
     <div class="card gc">
@@ -362,16 +366,59 @@ main{flex:1;padding:14px 14px calc(var(--navh) + env(safe-area-inset-bottom) + 8
 <div class="ov" id="set-modal">
   <div class="mdl">
     <div class="mtitle">Settings &amp; API Keys</div>
-    <div class="flbl">AirNow API Key</div>
-    <input class="fi" id="set-airnow" placeholder="Your AirNow key">
-    <div class="fnote">Free key: <a href="https://docs.airnowapi.org/account/request/" target="_blank" style="color:var(--ac2)">airnowapi.org</a></div>
-    <div class="flbl">Google Pollen API Key (optional)</div>
-    <input class="fi" id="set-pollen" placeholder="Google Pollen API key">
-    <div class="fnote">If blank, Open-Meteo pollen data is used (no key required)</div>
-    <div class="flbl">Custom Pollen URL (overrides above)</div>
-    <input class="fi" id="set-purl" placeholder="https://…">
-    <div class="fnote">Must return JSON. AccuWeather pages are HTML and cannot be used.</div>
-    <div class="mfoot"><button class="mb" id="set-cancel">Cancel</button><button class="mb p" id="set-save">Save &amp; Refresh</button></div>
+
+    <!-- NWS -->
+    <div class="stsource">
+      <div class="stsource-hdr">
+        <span class="stsource-name">Weather &amp; Forecast</span>
+        <span class="stbadge stload" id="st-weather">—</span>
+      </div>
+      <div class="stsource-hdr" style="margin-top:4px">
+        <span class="stsource-name" style="color:var(--tx3)">Forecast</span>
+        <span class="stbadge stload" id="st-forecast">—</span>
+      </div>
+      <div class="fnote" style="margin-top:6px">
+        Data from <a href="https://www.weather.gov" target="_blank" style="color:var(--ac2)">National Weather Service</a>
+        (api.weather.gov) &mdash; no API key required.
+        UV index &amp; dew point supplemented by <a href="https://open-meteo.com" target="_blank" style="color:var(--ac2)">Open-Meteo</a>.
+      </div>
+    </div>
+
+    <!-- AirNow -->
+    <div class="stsource">
+      <div class="stsource-hdr">
+        <span class="stsource-name">Air Quality</span>
+        <span class="stbadge stload" id="st-aq">—</span>
+      </div>
+      <div class="flbl" style="margin-top:8px">AirNow API Key</div>
+      <input class="fi" id="set-airnow" placeholder="Paste your AirNow API key">
+      <div class="fnote">
+        Free key at <a href="https://docs.airnowapi.org/account/request/" target="_blank" style="color:var(--ac2)">airnowapi.org</a>.
+        Data from the US EPA AirNow network.
+      </div>
+    </div>
+
+    <!-- Pollen -->
+    <div class="stsource">
+      <div class="stsource-hdr">
+        <span class="stsource-name">Pollen &amp; Allergens</span>
+        <span class="stbadge stload" id="st-pollen">—</span>
+      </div>
+      <div class="flbl" style="margin-top:8px">Google Pollen API Key <span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--tx3)">(optional)</span></div>
+      <input class="fi" id="set-pollen" placeholder="Paste your Google Pollen API key">
+      <div class="fnote">
+        If left blank, pollen data is provided automatically by
+        <a href="https://open-meteo.com" target="_blank" style="color:var(--ac2)">Open-Meteo</a> (grass, tree, weed &mdash; no key needed).
+        For more species detail, enable the
+        <a href="https://developers.google.com/maps/documentation/pollen" target="_blank" style="color:var(--ac2)">Google Pollen API</a>
+        and paste your key above.
+      </div>
+    </div>
+
+    <div class="mfoot">
+      <button class="mb" id="set-cancel">Cancel</button>
+      <button class="mb p" id="set-save">Save &amp; Refresh</button>
+    </div>
   </div>
 </div>
 
@@ -395,7 +442,7 @@ const S={
   lat:null,lng:null,locName:'',
   useFahrenheit:true,
   weather:null,forecast:null,aq:null,pollen:null,
-  keys:{airnow:'D2A5BD42-00D6-4F75-881D-2E3106AA6205',pollen:'',purl:''},
+  keys:{airnow:'',pollen:''},
   logs:[],selEmojis:new Set(),editId:null,
 };
 
@@ -416,7 +463,7 @@ const wIcon=c=>{const m=(WMO[c]||'🌡️').match(/\p{Emoji_Presentation}/gu);re
 function loadStore(){
   try{
     const k=JSON.parse(localStorage.getItem('atmo_k')||'{}');
-    if(k.a)S.keys.airnow=k.a; if(k.p)S.keys.pollen=k.p; if(k.u)S.keys.purl=k.u;
+    if(k.a)S.keys.airnow=k.a; if(k.p)S.keys.pollen=k.p;
     const l=JSON.parse(localStorage.getItem('atmo_l')||'{}');
     if(l.lat!=null){S.lat=parseFloat(l.lat);S.lng=parseFloat(l.lng);S.locName=l.n||'';}
     S.logs=JSON.parse(localStorage.getItem('atmo_log')||'[]');
@@ -424,7 +471,7 @@ function loadStore(){
     if(u)S.useFahrenheit=(u==='F');
   }catch(e){console.warn('store',e);}
 }
-const saveKeys=()=>localStorage.setItem('atmo_k',JSON.stringify({a:S.keys.airnow,p:S.keys.pollen,u:S.keys.purl}));
+const saveKeys=()=>localStorage.setItem('atmo_k',JSON.stringify({a:S.keys.airnow,p:S.keys.pollen}));
 const saveLoc=()=>localStorage.setItem('atmo_l',JSON.stringify({lat:S.lat,lng:S.lng,n:S.locName}));
 const saveLogs=()=>localStorage.setItem('atmo_log',JSON.stringify(S.logs));
 
@@ -440,10 +487,13 @@ const fTs=c=>S.useFahrenheit?`${cF(c)}°`:`${Math.round(c)}°`;
 // ════════════════════════════════════
 let anyError=false;
 function diagSet(key,state,msg){
-  const el=document.getElementById('ds-'+key); if(!el)return;
-  el.className='dval '+(state==='ok'?'ok':state==='err'?'err':'loading');
-  el.textContent=msg;
-  if(state==='err'){anyError=true; document.getElementById('diagbar').classList.add('on');}
+  // Update inline status badge inside settings modal
+  const badge=document.getElementById('st-'+key);
+  if(badge){
+    badge.className='stbadge '+(state==='ok'?'stok':state==='err'?'sterr':'stload');
+    badge.textContent=msg;
+  }
+  if(state==='err') anyError=true;
 }
 
 // ════════════════════════════════════
@@ -588,25 +638,24 @@ function nwsIcon(desc, isDaytime) {
   return isDaytime ? '🌤️' : '🌙';
 }
 
-// AirNow via allorigins proxy (handles CORS from file:// and Edge iOS)
+// AirNow — direct call (AirNow sends Access-Control-Allow-Origin: * from HTTPS origins)
 async function fetchAQ(){
   const{lat,lng}=S;
   if(!S.keys.airnow){
-    diagSet('aq','err','No API key — add in Settings ⚙');
+    diagSet('aq','err','Add your AirNow API key in Settings ⚙');
     showCardErr('aq','Add AirNow key in Settings ⚙');
     return;
   }
-  diagSet('aq','loading','Fetching via proxy…');
+  diagSet('aq','loading','Fetching…');
   try{
-    const target=encodeURIComponent(
+    const url=
       `https://www.airnowapi.org/aq/observation/latLong/current/?format=application/json`+
-      `&latitude=${lat}&longitude=${lng}&distance=25&API_KEY=${S.keys.airnow}`
-    );
-    const w=await safeFetch(`https://api.allorigins.win/get?url=${target}`);
-    if(!w.contents)throw new Error('Empty proxy response');
-    const data=JSON.parse(w.contents);
-    if(!Array.isArray(data))throw new Error('Unexpected format: '+JSON.stringify(data).slice(0,80));
-    if(data.length===0)throw new Error('No observations within 25 mi');
+      `&latitude=${lat}&longitude=${lng}&distance=25&API_KEY=${S.keys.airnow}`;
+    const r=await fetch(url);
+    if(!r.ok) throw new Error(`AirNow HTTP ${r.status}`);
+    const data=await r.json();
+    if(!Array.isArray(data)) throw new Error('Unexpected AirNow response');
+    if(data.length===0) throw new Error('No AirNow observations within 25 mi of this location');
     diagSet('aq','ok','AirNow ✓');
     renderAQ(data);
   }catch(e){
@@ -615,17 +664,11 @@ async function fetchAQ(){
   }
 }
 
-// Pollen: Open-Meteo (no key), Google API (key), or custom URL
+// Pollen: Google API (if key provided) else Open-Meteo (no key required)
 async function fetchPollen(){
   const{lat,lng}=S;
   diagSet('pollen','loading','Fetching…');
   try{
-    // Custom URL overrides everything
-    if(S.keys.purl){
-      const d=await safeFetch(S.keys.purl);
-      diagSet('pollen','ok','Custom URL ✓');
-      renderPollen(d,'custom'); return;
-    }
     // Google Pollen API
     if(S.keys.pollen){
       const d=await safeFetch(
@@ -1151,14 +1194,12 @@ document.getElementById('loc-save').addEventListener('click',async()=>{
 document.getElementById('settings-btn').addEventListener('click',()=>{
   document.getElementById('set-airnow').value=S.keys.airnow;
   document.getElementById('set-pollen').value=S.keys.pollen;
-  document.getElementById('set-purl').value=S.keys.purl;
   document.getElementById('set-modal').classList.add('on');
 });
 document.getElementById('set-cancel').addEventListener('click',()=>document.getElementById('set-modal').classList.remove('on'));
 document.getElementById('set-save').addEventListener('click',()=>{
   S.keys.airnow=document.getElementById('set-airnow').value.trim();
   S.keys.pollen=document.getElementById('set-pollen').value.trim();
-  S.keys.purl=document.getElementById('set-purl').value.trim();
   saveKeys();document.getElementById('set-modal').classList.remove('on');loadAll();
 });
 
