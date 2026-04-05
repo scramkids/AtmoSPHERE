@@ -47,7 +47,9 @@ main{flex:1;padding:14px 14px calc(var(--navh) + env(safe-area-inset-bottom) + 8
   .dgrid{grid-template-columns:1fr 1fr}
   .gcol-right{grid-column:1/-1;display:grid;grid-template-columns:1fr 1fr;gap:13px}
 }
-@media(max-width:700px){
+/* Mobile: phones in portrait AND landscape (iPhone landscape ≈ 390-932px) */
+@media(max-width:960px) and (max-height:500px),
+(max-width:600px){
   main{padding:12px 12px calc(var(--navh) + env(safe-area-inset-bottom) + 4px)}
   .dgrid{display:none}
   .bnav{display:flex}
@@ -720,10 +722,16 @@ async function fetchPollen(){
     }else{
       const d=await safeFetch(
         `https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${lat}&longitude=${lng}`+
-        `&hourly=grass_pollen,tree_pollen,weed_pollen&timezone=auto&forecast_days=5`
+        `&hourly=grass_pollen,birch_pollen,ragweed_pollen&timezone=auto&forecast_days=5`
       );
       diagSet('pollen','ok','Open-Meteo ✓');
-      S.pollenForecast=d.hourly;
+      // Map birch→tree_pollen, ragweed→weed_pollen for forecast matching
+      S.pollenForecast={
+        time:d.hourly.time,
+        grass_pollen:d.hourly.grass_pollen,
+        tree_pollen:d.hourly.birch_pollen,
+        weed_pollen:d.hourly.ragweed_pollen,
+      };
       renderPollen(d,'openmeteo');
     }
   }catch(e){diagSet('pollen','err',e.message);showCardErr('poll','Pollen: '+e.message);}
@@ -1002,11 +1010,11 @@ function renderPollen(data,source){
   if(source==='openmeteo'){
     const h=data.hourly;
     const pick=arr=>{for(let i=0;i<(arr||[]).length;i++){if(arr[i]!=null&&arr[i]>0)return arr[i];}return 0;};
-    const grass=pick(h.grass_pollen),tree=pick(h.tree_pollen),weed=pick(h.weed_pollen);
+    const grass=pick(h.grass_pollen),tree=pick(h.birch_pollen),weed=pick(h.ragweed_pollen);
     types=[
       {name:'Grass',idx:omPolScale(grass),cat:polCatName(omPolScale(grass)),raw:Math.round(grass)+' gr/m³'},
-      {name:'Tree', idx:omPolScale(tree), cat:polCatName(omPolScale(tree)), raw:Math.round(tree)+' gr/m³'},
-      {name:'Weed', idx:omPolScale(weed), cat:polCatName(omPolScale(weed)), raw:Math.round(weed)+' gr/m³'},
+      {name:'Tree (Birch)',idx:omPolScale(tree),cat:polCatName(omPolScale(tree)),raw:Math.round(tree)+' gr/m³'},
+      {name:'Ragweed',idx:omPolScale(weed),cat:polCatName(omPolScale(weed)),raw:Math.round(weed)+' gr/m³'},
     ];
   }else if(source==='google'){
     const day=(data.dailyInfo||[])[0]||{};
