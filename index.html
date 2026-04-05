@@ -482,7 +482,7 @@ const wDesc=c=>WMO[c]||'Condition '+c;
 function loadStore(){
   try{
     const k=JSON.parse(localStorage.getItem('atmo_k')||'{}');
-    if(k.a)S.keys.airnow=k.a; if(k.p)S.keys.pollen=k.p;
+    if('a' in k)S.keys.airnow=k.a||''; if('p' in k)S.keys.pollen=k.p||'';
     const l=JSON.parse(localStorage.getItem('atmo_l')||'{}');
     if(l.lat!=null){S.lat=parseFloat(l.lat);S.lng=parseFloat(l.lng);S.locName=l.n||'';}
     S.logs=JSON.parse(localStorage.getItem('atmo_log')||'[]');
@@ -711,7 +711,7 @@ async function fetchPollen(){
   const{lat,lng}=S;
   diagSet('pollen','loading','Fetching…');
   try{
-    if(S.keys.pollen){
+    if(S.keys.pollen && S.keys.pollen.trim()){
       const d=await safeFetch(`https://pollen.googleapis.com/v1/forecast:lookup?key=${S.keys.pollen}&location.longitude=${lng}&location.latitude=${lat}&days=5`);
       diagSet('pollen','ok','Google Pollen ✓');
       // Build hourly-like structure: spread each day's value across all 24 hours
