@@ -40,19 +40,21 @@ header{display:flex;align-items:center;justify-content:space-between;padding:0 1
 /* MAIN */
 main{flex:1;padding:14px 14px calc(var(--navh) + env(safe-area-inset-bottom) + 8px)}
 
-/* DESKTOP GRID — Now / Forecast / Log columns */
-.dgrid{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1.8fr) minmax(0,1fr);gap:13px;max-width:1440px;margin:0 auto;align-items:start}
-/* Now column: current + alerts + pollen + AQ stacked */
-.gcol-now{display:flex;flex-direction:column;gap:13px}
-/* Forecast column */
-.gcol-fcast{display:flex;flex-direction:column;gap:13px}
-/* Log column */
-.gcol-log{display:flex;flex-direction:column;gap:13px}
+/* DESKTOP GRID: left=now+log, mid=forecast, right=alerts+pollen+aq */
+.dgrid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.9fr) minmax(0,1fr);gap:13px;max-width:1440px;margin:0 auto;align-items:start}
+.gcol{display:flex;flex-direction:column;gap:13px}
 @media(max-width:1100px){
   .dgrid{grid-template-columns:1fr 1fr}
-  .gcol-log{grid-column:1/-1}
+  .gcol-right{grid-column:1/-1;display:grid;grid-template-columns:1fr 1fr;gap:13px}
 }
-
+@media(max-width:700px){
+  main{padding:12px 12px calc(var(--navh) + env(safe-area-inset-bottom) + 4px)}
+  .dgrid{display:none}
+  .bnav{display:flex}
+  .mpanel{display:block}
+  .mpanel.off{display:none}
+  .mpanel .card+.card{margin-top:13px}
+}
 
 /* CARD */
 .card{background:var(--sf);border:1px solid var(--bdr);border-radius:var(--r);padding:16px;box-shadow:var(--sh);position:relative;overflow:hidden}
@@ -62,6 +64,17 @@ main{flex:1;padding:14px 14px calc(var(--navh) + env(safe-area-inset-bottom) + 8
 .bg{background:rgba(42,156,90,.12);color:var(--good);border-color:rgba(42,156,90,.25)}
 .bw{background:rgba(232,160,32,.15);color:var(--warn);border-color:rgba(232,160,32,.3)}
 .bb{background:rgba(200,42,42,.12);color:var(--bad);border-color:rgba(200,42,42,.25)}
+
+/* COLLAPSIBLE — all cards */
+.card.collapsible>.card-hdr{cursor:pointer;user-select:none;-webkit-user-select:none;position:relative;z-index:11}
+.card.collapsible>.card-hdr::after{content:'\25BE';font-size:11px;color:var(--tx3);margin-left:6px;display:inline-block;transition:transform .2s}
+.card.collapsible.collapsed>.card-hdr::after{transform:rotate(-90deg)}
+.card.collapsible>.card-body{overflow:hidden;transition:max-height .35s ease,opacity .25s ease;max-height:1200px;opacity:1}
+.card.collapsible.collapsed>.card-body{max-height:0;opacity:0;pointer-events:none}
+/* When card has no explicit .card-body wrapper, collapse the siblings after .card-hdr */
+.card.collapsible.collapsed>.ldr,
+.card.collapsible.collapsed>[id]{display:none}
+.card.collapsible.collapsed>.ts{display:none}
 
 /* LOADER */
 .ldr{position:absolute;inset:0;border-radius:var(--r);background:var(--sf);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:9px;z-index:10;transition:opacity .3s}
@@ -73,68 +86,66 @@ main{flex:1;padding:14px 14px calc(var(--navh) + env(safe-area-inset-bottom) + 8
 .nodata{font-size:12px;color:var(--tx3);text-align:center;padding:14px 0}
 .ts{font-size:9px;color:var(--tx3);margin-top:9px}
 
-/* ALERT BAR */
-.abar{display:none;margin-bottom:11px;padding:7px 11px;background:rgba(200,42,42,.1);border:1px solid rgba(200,42,42,.3);border-radius:7px;font-size:11px;color:var(--bad);line-height:1.4}
+/* CURRENT WEATHER — compact text layout */
+.abar{display:none;margin-bottom:10px;padding:7px 11px;background:rgba(200,42,42,.1);border:1px solid rgba(200,42,42,.3);border-radius:7px;font-size:11px;color:var(--bad);line-height:1.4}
 .abar.on{display:block}
+.cur-temp-row{display:flex;align-items:baseline;gap:10px;margin-bottom:6px}
+.bigT{font-family:'Fraunces',serif;font-size:58px;font-weight:200;line-height:1;letter-spacing:-3px}
+.bigT sup{font-size:22px;letter-spacing:0;vertical-align:super}
+.cur-feels{font-size:13px;color:var(--tx3)}
+.cur-desc-row{font-size:14px;color:var(--tx2);margin-bottom:10px}
+.cur-stats{display:flex;flex-direction:column;gap:4px}
+.cur-stat-line{font-size:12px;color:var(--tx2);display:flex;align-items:center;gap:6px}
+.cur-stat-line .icon{font-size:14px;flex-shrink:0;width:18px;text-align:center}
+.cur-stat-line .val{color:var(--tx)}
+.cur-stat-line .val.wn{color:var(--warn)}
+.cur-stat-line .val.hi{color:var(--bad)}
+.cur-stat-line .val.lo{color:var(--ac2)}
+.uvbar{display:inline-block;width:60px;height:5px;border-radius:3px;background:var(--bg3);overflow:hidden;vertical-align:middle;margin-left:4px}
+.uvfill{height:100%;border-radius:3px}
 
-/* CURRENT WEATHER */
-.cur-layout{display:grid;grid-template-columns:1fr 1fr;gap:13px;align-items:start}
-.bigT{font-family:'Fraunces',serif;font-size:66px;font-weight:200;line-height:1;letter-spacing:-3px;margin-bottom:4px}
-.bigT sup{font-size:25px;letter-spacing:0;vertical-align:super}
-.cdesc{font-size:13px;color:var(--tx2);margin-bottom:13px;text-transform:capitalize}
-.sgrid{display:grid;grid-template-columns:1fr 1fr;gap:6px}
-.stat{background:var(--bg2);border:1px solid var(--bdr);border-radius:7px;padding:8px 10px}
-.slbl{font-size:9px;color:var(--tx3);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:3px}
-.sval{font-size:14px;color:var(--tx)}
-.sval.hi{color:var(--bad)}.sval.wn{color:var(--warn)}.sval.lo{color:var(--ac2)}
-.uvbar{width:100%;height:5px;border-radius:3px;margin-top:4px;background:var(--bg3);overflow:hidden}
-.uvfill{height:100%;border-radius:3px;transition:width .8s}
-
-/* ALERTS STRIP — elevated env factors */
+/* ALERTS STRIP */
 .alerts-strip{display:flex;flex-direction:column;gap:6px}
-.alert-item{
-  display:flex;align-items:center;gap:9px;padding:8px 11px;
-  border-radius:8px;font-size:11px;border:1px solid var(--bdr);background:var(--bg2);
-}
-.alert-item.lvl-mod {border-color:rgba(232,160,32,.4);background:rgba(232,160,32,.07)}
-.alert-item.lvl-hi  {border-color:rgba(200,90,42,.4); background:rgba(200,90,42,.07)}
-.alert-item.lvl-vhi {border-color:rgba(200,42,42,.4); background:rgba(200,42,42,.07)}
+.alert-item{display:flex;align-items:center;gap:9px;padding:8px 11px;border-radius:8px;font-size:11px;border:1px solid var(--bdr);background:var(--bg2)}
+.alert-item.lvl-mod{border-color:rgba(232,160,32,.4);background:rgba(232,160,32,.07)}
+.alert-item.lvl-hi {border-color:rgba(200,90,42,.4);background:rgba(200,90,42,.07)}
+.alert-item.lvl-vhi{border-color:rgba(200,42,42,.4);background:rgba(200,42,42,.07)}
 .alert-icon{font-size:16px;flex-shrink:0}
 .alert-info{flex:1}
 .alert-name{font-weight:500;color:var(--tx)}
 .alert-cat{font-size:10px;color:var(--tx3);margin-top:1px}
 .alert-badge{font-size:10px;padding:2px 7px;border-radius:20px;flex-shrink:0}
 .alert-item.lvl-mod .alert-badge{background:rgba(232,160,32,.15);color:var(--warn);border:1px solid rgba(232,160,32,.3)}
-.alert-item.lvl-hi  .alert-badge{background:rgba(200,90,42,.12);color:var(--ac);  border:1px solid rgba(200,90,42,.3)}
-.alert-item.lvl-vhi .alert-badge{background:rgba(200,42,42,.12); color:var(--bad); border:1px solid rgba(200,42,42,.3)}
+.alert-item.lvl-hi  .alert-badge{background:rgba(200,90,42,.12);color:var(--ac);border:1px solid rgba(200,90,42,.3)}
+.alert-item.lvl-vhi .alert-badge{background:rgba(200,42,42,.12);color:var(--bad);border:1px solid rgba(200,42,42,.3)}
 .alerts-empty{font-size:11px;color:var(--good);padding:4px 2px}
 
-/* FORECAST TABS */
-.ftabs{display:flex;gap:2px;margin-bottom:13px;background:var(--bg2);border-radius:8px;padding:3px}
-.ftab{
-  flex:1;padding:5px 4px;border:none;background:none;border-radius:6px;
-  font-family:'DM Mono',monospace;font-size:10px;color:var(--tx3);cursor:pointer;
-  transition:all .15s;white-space:nowrap;text-align:center;
-}
-.ftab.on{background:var(--sf);color:var(--tx);box-shadow:0 1px 4px rgba(0,0,0,.1)}
-
-/* FORECAST SCROLL ROW */
-.frow{display:grid;grid-template-columns:repeat(10,minmax(60px,1fr));gap:5px;overflow-x:auto;padding-bottom:4px}
-.frow.hourly{grid-template-columns:repeat(24,minmax(52px,1fr))}
+/* FORECAST — hourly above daily, no tabs */
+.fcast-section-lbl{font-size:9px;text-transform:uppercase;letter-spacing:1.5px;color:var(--tx3);margin-bottom:6px;margin-top:12px}
+.fcast-section-lbl:first-child{margin-top:0}
+.frow{display:grid;gap:5px;overflow-x:auto;padding-bottom:4px}
 .frow::-webkit-scrollbar{height:3px}
 .frow::-webkit-scrollbar-thumb{background:var(--bdr);border-radius:2px}
-.fd{background:var(--bg2);border:1px solid var(--bdr);border-radius:9px;padding:8px 4px;text-align:center;position:relative}
-.fd.td{border-color:var(--ac);background:rgba(200,90,42,.06)}
+.frow-hourly{grid-template-columns:repeat(24,minmax(56px,1fr))}
+.frow-daily {grid-template-columns:repeat(7,minmax(68px,1fr))}
+.fd{background:var(--bg2);border:1px solid var(--bdr);border-radius:9px;padding:0;text-align:center;position:relative;overflow:hidden;display:flex;flex-direction:column}
+.fd.td{border-color:var(--ac)}
 .fd.fa{border-color:var(--bad)}.fd.fw{border-color:var(--warn)}
-.fddot{position:absolute;top:5px;right:5px;width:5px;height:5px;border-radius:50%;display:none}
+.fddot{position:absolute;top:4px;right:4px;width:5px;height:5px;border-radius:50%;display:none}
 .fa .fddot{display:block;background:var(--bad)}.fw .fddot{display:block;background:var(--warn)}
-.fdn{font-size:9px;color:var(--tx3);text-transform:uppercase;letter-spacing:.6px;margin-bottom:4px}
-.fdi{font-size:19px;margin-bottom:4px}.fdh{font-size:13px}.fdl{font-size:10px;color:var(--tx3)}
-.fdr{font-size:9px;color:var(--ac2);margin-top:3px}
-/* Pollen/AQ forecast cell extras */
-.fdp{display:flex;flex-direction:column;gap:2px;margin-top:3px}
-.fdpi{font-size:9px;color:var(--tx3)}
-.fdpi span{display:inline-block;width:6px;height:6px;border-radius:50%;margin-right:3px;vertical-align:middle}
+.fd-sect{padding:6px 4px;text-align:center}
+.fd-sect+.fd-sect{border-top:1px solid var(--bdr)}
+.fd-sect.wx{} 
+.fd-sect.pol{background:rgba(42,156,90,.04)}
+.fd-sect.aqi{background:rgba(42,106,200,.04)}
+.fdn{font-size:9px;color:var(--tx3);text-transform:uppercase;letter-spacing:.6px;margin-bottom:3px}
+.fdi{font-size:17px;margin-bottom:2px}
+.fdh{font-size:12px;font-weight:500}
+.fdl{font-size:10px;color:var(--tx3)}
+.fdr{font-size:9px;color:var(--ac2);margin-top:2px}
+.fdslbl{font-size:8px;color:var(--tx3);margin-bottom:2px}
+.fdpi{font-size:9px;color:var(--tx3);line-height:1.5}
+.fdpi .dot{display:inline-block;width:6px;height:6px;border-radius:50%;margin-right:3px;vertical-align:middle}
 
 /* POLLEN */
 .prow{display:flex;align-items:center;gap:7px;margin-bottom:7px}
@@ -145,11 +156,11 @@ main{flex:1;padding:14px 14px calc(var(--navh) + env(safe-area-inset-bottom) + 8
 .pcat{font-size:10px;color:var(--tx3);width:60px;text-align:right;flex-shrink:0}
 
 /* AQ */
-.aqnum{font-family:'Fraunces',serif;font-size:52px;font-weight:200;line-height:1;letter-spacing:-2px}
-.aqcat{font-size:13px;margin-bottom:12px}
-.aqscale{width:100%;height:7px;border-radius:4px;margin:9px 0 3px;position:relative;background:linear-gradient(to right,#00e400,#ffff00,#ff7e00,#ff0000,#8f3f97,#7e0023)}
+.aqnum{font-family:'Fraunces',serif;font-size:48px;font-weight:200;line-height:1;letter-spacing:-2px}
+.aqcat{font-size:13px;margin-bottom:10px}
+.aqscale{width:100%;height:7px;border-radius:4px;margin:8px 0 3px;position:relative;background:linear-gradient(to right,#00e400,#ffff00,#ff7e00,#ff0000,#8f3f97,#7e0023)}
 .aqptr{position:absolute;top:-3px;width:3px;height:13px;background:var(--tx);border-radius:2px;transform:translateX(-50%);transition:left .8s}
-.aqlbls{display:flex;justify-content:space-between;font-size:8px;color:var(--tx3);margin-bottom:11px}
+.aqlbls{display:flex;justify-content:space-between;font-size:8px;color:var(--tx3);margin-bottom:10px}
 .plist{display:flex;flex-direction:column;gap:5px}
 .pitem{display:flex;justify-content:space-between;align-items:center}
 .piname{font-size:11px;color:var(--tx2)}.pival{font-size:11px}.piunit{font-size:9px;color:var(--tx3)}
@@ -184,24 +195,14 @@ main{flex:1;padding:14px 14px calc(var(--navh) + env(safe-area-inset-bottom) + 8
 .abtn:hover{background:var(--bg3)}
 .abtn.del:hover{background:rgba(200,42,42,.1)}
 
-/* BOTTOM NAV — 3 tabs */
+/* BOTTOM NAV */
 .bnav{position:fixed;bottom:0;left:0;right:0;height:calc(var(--navh) + env(safe-area-inset-bottom));padding-bottom:env(safe-area-inset-bottom);background:var(--sf);border-top:1px solid var(--bdr);z-index:200;justify-content:space-around;align-items:stretch;display:none}
 .nb{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;border:none;background:none;cursor:pointer;color:var(--tx3);font-family:'DM Mono',monospace;font-size:9px;text-transform:uppercase;letter-spacing:.3px;transition:color .15s;position:relative}
 .nb.on{color:var(--ac)}
 .nb svg{width:21px;height:21px}
 .nbdot{position:absolute;top:6px;right:calc(50% - 14px);width:6px;height:6px;border-radius:50%;background:var(--bad);display:none}
 .nbdot.on{display:block}
-
-/* MOBILE PANELS */
 .mpanel{display:none}
-@media(max-width:700px){
-  main{padding:12px 12px calc(var(--navh) + env(safe-area-inset-bottom) + 4px)}
-  .dgrid{display:none}
-  .bnav{display:flex}
-  .mpanel{display:block}
-  .mpanel.off{display:none}
-  .mpanel .card+.card{margin-top:13px}
-}
 
 /* MODAL */
 .ov{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:500;align-items:center;justify-content:center;padding:18px}
@@ -228,27 +229,8 @@ main{flex:1;padding:14px 14px calc(var(--navh) + env(safe-area-inset-bottom) + 8
 .stsource-name{font-size:11px;font-weight:500;color:var(--tx2)}
 .stbadge{font-size:10px;padding:2px 8px;border-radius:20px;white-space:nowrap;flex-shrink:0}
 .stok  {background:rgba(42,156,90,.12);color:var(--good);border:1px solid rgba(42,156,90,.25)}
-.sterr {background:rgba(200,42,42,.12);color:var(--bad); border:1px solid rgba(200,42,42,.25)}
+.sterr {background:rgba(200,42,42,.12);color:var(--bad);border:1px solid rgba(200,42,42,.25)}
 .stload{background:var(--bg3);color:var(--tx3);border:1px solid var(--bdr)}
-
-
-/* COLLAPSIBLE CARDS (mobile) */
-.collapsible .card-hdr{cursor:pointer;user-select:none;-webkit-user-select:none;position:relative;z-index:11}
-.collapsible .card-hdr::after{content:'\25BE';font-size:11px;color:var(--tx3);margin-left:6px;display:inline-block;transition:transform .2s}
-.collapsible.collapsed .card-hdr::after{transform:rotate(-90deg)}
-.collapsible .card-body{overflow:hidden;transition:max-height .35s ease,opacity .25s ease;max-height:800px;opacity:1}
-.collapsible.collapsed .card-body{max-height:0;opacity:0}
-
-
-/* COMBINED FORECAST CELLS */
-.frow-daily {grid-template-columns:repeat(7,minmax(72px,1fr))}
-.frow-hourly{grid-template-columns:repeat(24,minmax(58px,1fr));overflow-x:auto}
-.fd-combined{padding:0;overflow:hidden;display:flex;flex-direction:column;min-width:0}
-.fd-section{padding:6px 4px;text-align:center}
-.fd-wx{border-bottom:1px solid var(--bdr)}
-.fd-poll{border-bottom:1px solid var(--bdr);background:rgba(42,156,90,.04)}
-.fd-aq{background:rgba(42,106,200,.04)}
-.fd-sec-lbl{font-size:9px;color:var(--tx3);margin-bottom:2px}
 
 @keyframes fu{from{opacity:0;transform:translateY(9px)}to{opacity:1;transform:translateY(0)}}
 .card{animation:fu .3s ease both}
@@ -267,13 +249,12 @@ main{flex:1;padding:14px 14px calc(var(--navh) + env(safe-area-inset-bottom) + 8
 </header>
 
 <main>
-<!-- ═══════════════ DESKTOP GRID ═══════════════ -->
+<!-- DESKTOP GRID: left=now+log  mid=forecast  right=alerts+poll+aq -->
 <div class="dgrid">
 
-  <!-- NOW COLUMN: current + alerts + pollen + AQ -->
-  <div class="gcol-now">
-    <!-- Current Weather -->
-    <div class="card">
+  <!-- LEFT: current conditions + log -->
+  <div class="gcol gcol-left">
+    <div class="card collapsible" id="card-cur">
       <div class="ldr" id="ldr-cur"><div class="spin"></div><div class="ldr-msg">Loading weather…</div><div class="ldr-detail" id="err-cur"></div></div>
       <div class="card-hdr">
         <span class="ctitle">Current</span>
@@ -282,61 +263,64 @@ main{flex:1;padding:14px 14px calc(var(--navh) + env(safe-area-inset-bottom) + 8
           <span class="badge" id="cur-badge">—</span>
         </div>
       </div>
-      <div id="cur-body"></div>
-      <div class="ts" id="cur-ts"></div>
-    </div>
-    <!-- Elevated Allergens & Air Quality -->
-    <div class="card">
-      <div class="ldr off" id="ldr-alerts"><div class="spin"></div><div class="ldr-msg">Loading…</div></div>
-      <div class="card-hdr"><span class="ctitle">Environmental Alerts</span><span class="badge" id="alerts-badge">—</span></div>
-      <div id="alerts-body"><div class="nodata">Waiting for data…</div></div>
-    </div>
-    <!-- Pollen Detail -->
-    <div class="card">
-      <div class="ldr" id="ldr-poll"><div class="spin"></div><div class="ldr-msg">Loading pollen…</div><div class="ldr-detail" id="err-poll"></div></div>
-      <div class="card-hdr"><span class="ctitle">Pollen &amp; Allergens</span><span class="badge" id="poll-badge">—</span></div>
-      <div id="poll-body"></div>
-      <div class="ts" id="poll-ts"></div>
-    </div>
-    <!-- AQ Detail -->
-    <div class="card">
-      <div class="ldr" id="ldr-aq"><div class="spin"></div><div class="ldr-msg">Loading air quality…</div><div class="ldr-detail" id="err-aq"></div></div>
-      <div class="card-hdr"><span class="ctitle">Air Quality</span><span class="badge" id="aq-badge">AirNow</span></div>
-      <div id="aq-body"></div>
-      <div class="ts" id="aq-ts"></div>
-    </div>
-  </div>
-
-  <!-- FORECAST COLUMN -->
-  <div class="gcol-fcast">
-    <div class="card">
-      <div class="ldr" id="ldr-fcast"><div class="spin"></div><div class="ldr-msg">Loading forecast…</div><div class="ldr-detail" id="err-fcast"></div></div>
-      <div class="card-hdr"><span class="ctitle">Forecast</span><span class="badge" id="fcast-src-badge">NWS</span></div>
-      <div class="ftabs" id="ftabs-d">
-        <button class="ftab on" data-tab="daily">Daily</button>
-        <button class="ftab" data-tab="hourly">Hourly</button>
+      <div class="card-body">
+        <div id="cur-body"></div>
+        <div class="ts" id="cur-ts"></div>
       </div>
-      <div id="fcast-body"></div>
-      <div class="ts" id="fcast-ts"></div>
     </div>
-  </div>
-
-  <!-- LOG COLUMN -->
-  <div class="gcol-log">
-    <div class="card">
+    <div class="card collapsible collapsed" id="card-log">
       <div class="card-hdr">
         <span class="ctitle">How I Feel</span>
         <button class="hbtn" id="export-btn" style="font-size:10px;padding:4px 9px">&#8595; Export</button>
       </div>
-      <div id="log-body-d"></div>
+      <div class="card-body">
+        <div id="log-body-d"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MIDDLE: forecast (hourly + daily stacked) -->
+  <div class="gcol gcol-mid">
+    <div class="card collapsible" id="card-fcast">
+      <div class="ldr" id="ldr-fcast"><div class="spin"></div><div class="ldr-msg">Loading forecast…</div><div class="ldr-detail" id="err-fcast"></div></div>
+      <div class="card-hdr"><span class="ctitle">Forecast</span><span class="badge">NWS + Open-Meteo</span></div>
+      <div class="card-body">
+        <div id="fcast-body"></div>
+        <div class="ts" id="fcast-ts"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RIGHT: alerts + pollen + AQ -->
+  <div class="gcol gcol-right">
+    <div class="card collapsible" id="card-alerts">
+      <div class="card-hdr"><span class="ctitle">Environmental Alerts</span><span class="badge" id="alerts-badge">—</span></div>
+      <div class="card-body">
+        <div id="alerts-body"><div class="nodata">Waiting for data…</div></div>
+      </div>
+    </div>
+    <div class="card collapsible" id="card-poll">
+      <div class="ldr" id="ldr-poll"><div class="spin"></div><div class="ldr-msg">Loading pollen…</div><div class="ldr-detail" id="err-poll"></div></div>
+      <div class="card-hdr"><span class="ctitle">Pollen &amp; Allergens</span><span class="badge" id="poll-badge">—</span></div>
+      <div class="card-body">
+        <div id="poll-body"></div>
+        <div class="ts" id="poll-ts"></div>
+      </div>
+    </div>
+    <div class="card collapsible" id="card-aq">
+      <div class="ldr" id="ldr-aq"><div class="spin"></div><div class="ldr-msg">Loading air quality…</div><div class="ldr-detail" id="err-aq"></div></div>
+      <div class="card-hdr"><span class="ctitle">Air Quality</span><span class="badge" id="aq-badge">AirNow</span></div>
+      <div class="card-body">
+        <div id="aq-body"></div>
+        <div class="ts" id="aq-ts"></div>
+      </div>
     </div>
   </div>
 </div>
 
-<!-- ═══════════════ MOBILE PANELS ═══════════════ -->
-<!-- NOW: current + alerts + pollen + AQ + log -->
+<!-- MOBILE PANELS -->
 <div class="mpanel" id="mp-now">
-  <div class="card">
+  <div class="card collapsible" id="mob-cur-card">
     <div class="ldr" id="ldr-mcur"><div class="spin"></div><div class="ldr-msg">Loading weather…</div><div class="ldr-detail" id="err-mcur"></div></div>
     <div class="card-hdr">
       <span class="ctitle">Current</span>
@@ -345,19 +329,21 @@ main{flex:1;padding:14px 14px calc(var(--navh) + env(safe-area-inset-bottom) + 8
         <span class="badge" id="m-cur-badge">—</span>
       </div>
     </div>
-    <div id="m-cur-body"></div>
-    <div class="ts" id="m-cur-ts"></div>
+    <div class="card-body">
+      <div id="m-cur-body"></div>
+      <div class="ts" id="m-cur-ts"></div>
+    </div>
   </div>
-  <div class="card">
+  <div class="card collapsible" id="mob-alerts-card">
     <div class="card-hdr"><span class="ctitle">Environmental Alerts</span><span class="badge" id="m-alerts-badge">—</span></div>
-    <div id="m-alerts-body"><div class="nodata">Waiting for data…</div></div>
+    <div class="card-body"><div id="m-alerts-body"><div class="nodata">Waiting for data…</div></div></div>
   </div>
-  <div class="card">
+  <div class="card collapsible collapsed" id="mob-log-card">
     <div class="card-hdr">
       <span class="ctitle">How I Feel</span>
       <button class="hbtn" id="m-export-btn" style="font-size:10px;padding:4px 9px">&#8595; Export</button>
     </div>
-    <div id="log-body-m"></div>
+    <div class="card-body"><div id="log-body-m"></div></div>
   </div>
   <div class="card collapsible collapsed" id="mob-poll-card">
     <div class="ldr" id="ldr-mpoll"><div class="spin"></div><div class="ldr-msg">Loading pollen…</div></div>
@@ -371,33 +357,28 @@ main{flex:1;padding:14px 14px calc(var(--navh) + env(safe-area-inset-bottom) + 8
   </div>
 </div>
 
-<!-- FORECAST -->
 <div class="mpanel off" id="mp-fcast">
-  <div class="card">
+  <div class="card collapsible" id="mob-fcast-card">
     <div class="ldr" id="ldr-mfcast"><div class="spin"></div><div class="ldr-msg">Loading forecast…</div></div>
-    <div class="card-hdr"><span class="ctitle">Forecast</span><span class="badge">NWS</span></div>
-    <div class="ftabs" id="ftabs-m">
-      <button class="ftab on" data-tab="daily">Daily</button>
-      <button class="ftab" data-tab="hourly">Hourly</button>
+    <div class="card-hdr"><span class="ctitle">Forecast</span><span class="badge">NWS + Open-Meteo</span></div>
+    <div class="card-body">
+      <div id="m-fcast-body"></div>
+      <div class="ts" id="m-fcast-ts"></div>
     </div>
-    <div id="m-fcast-body"></div>
-    <div class="ts" id="m-fcast-ts"></div>
   </div>
 </div>
 
-<!-- LOG (mobile-only dedicated panel, same content as in Now) -->
 <div class="mpanel off" id="mp-log">
-  <div class="card">
+  <div class="card collapsible" id="mob-logpanel-card">
     <div class="card-hdr">
       <span class="ctitle">How I Feel</span>
       <button class="hbtn" id="ml-export-btn" style="font-size:10px;padding:4px 9px">&#8595; Export</button>
     </div>
-    <div id="log-body-ml"></div>
+    <div class="card-body"><div id="log-body-ml"></div></div>
   </div>
 </div>
 </main>
 
-<!-- BOTTOM NAV — 3 tabs -->
 <nav class="bnav">
   <button class="nb on" data-sec="now">
     <span class="nbdot" id="nd-now"></span>
@@ -442,7 +423,7 @@ main{flex:1;padding:14px 14px calc(var(--navh) + env(safe-area-inset-bottom) + 8
     <div class="stsource">
       <div class="stsource-hdr"><span class="stsource-name">Weather &amp; Forecast</span><span class="stbadge stload" id="st-weather">—</span></div>
       <div class="stsource-hdr" style="margin-top:4px"><span class="stsource-name" style="color:var(--tx3)">Forecast</span><span class="stbadge stload" id="st-forecast">—</span></div>
-      <div class="fnote" style="margin-top:6px">Data from <a href="https://www.weather.gov" target="_blank" style="color:var(--ac2)">National Weather Service</a>. UV index &amp; dew point supplemented by <a href="https://open-meteo.com" target="_blank" style="color:var(--ac2)">Open-Meteo</a>. No API key required.</div>
+      <div class="fnote" style="margin-top:6px">Data from <a href="https://www.weather.gov" target="_blank" style="color:var(--ac2)">National Weather Service</a>. UV index &amp; dew point from <a href="https://open-meteo.com" target="_blank" style="color:var(--ac2)">Open-Meteo</a>. No API key required.</div>
     </div>
     <div class="stsource">
       <div class="stsource-hdr"><span class="stsource-name">Air Quality</span><span class="stbadge stload" id="st-aq">—</span></div>
@@ -454,7 +435,7 @@ main{flex:1;padding:14px 14px calc(var(--navh) + env(safe-area-inset-bottom) + 8
       <div class="stsource-hdr"><span class="stsource-name">Pollen &amp; Allergens</span><span class="stbadge stload" id="st-pollen">—</span></div>
       <div class="flbl" style="margin-top:8px">Google Pollen API Key <span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--tx3)">(optional)</span></div>
       <input class="fi" id="set-pollen" placeholder="Paste your Google Pollen API key">
-      <div class="fnote">If blank, <a href="https://open-meteo.com" target="_blank" style="color:var(--ac2)">Open-Meteo</a> pollen is used (no key needed). Google provides more species detail.</div>
+      <div class="fnote">If blank, <a href="https://open-meteo.com" target="_blank" style="color:var(--ac2)">Open-Meteo</a> pollen is used (no key needed).</div>
     </div>
     <div class="mfoot"><button class="mb" id="set-cancel">Cancel</button><button class="mb p" id="set-save">Save &amp; Refresh</button></div>
   </div>
@@ -472,19 +453,17 @@ main{flex:1;padding:14px 14px calc(var(--navh) + env(safe-area-inset-bottom) + 8
 
 <script>
 'use strict';
-
-// ════════════════════════════════
+// ═══════════════════════════════
 //  STATE
-// ════════════════════════════════
+// ═══════════════════════════════
 const S={
   lat:null,lng:null,locName:'',useFahrenheit:true,
   weather:null,forecast:null,forecastHourly:null,
   aq:null,pollen:null,pollenTypes:null,
-  pollenForecast:null,  // hourly arrays {time,grass,tree,weed}
-  aqForecast:null,      // hourly arrays from Open-Meteo AQ {time,pm25,pm10,ozone,no2}
+  pollenForecast:null,
+  aqForecast:null,
   keys:{airnow:'',pollen:''},
   logs:[],selEmojis:new Set(),editId:null,
-  fcastTab:'daily',  // active forecast tab
 };
 
 const EMOJIS=[
@@ -497,9 +476,9 @@ const EMOJIS=[
 const WMO={0:'Clear sky ☀️',1:'Mainly clear 🌤️',2:'Partly cloudy ⛅',3:'Overcast ☁️',45:'Foggy 🌫️',48:'Icy fog 🌫️',51:'Light drizzle 🌦️',53:'Drizzle 🌦️',55:'Heavy drizzle 🌧️',61:'Light rain 🌧️',63:'Rain 🌧️',65:'Heavy rain 🌧️',71:'Light snow 🌨️',73:'Snow 🌨️',75:'Heavy snow ❄️',80:'Showers 🌦️',81:'Heavy showers 🌧️',82:'Violent showers ⛈️',95:'Thunderstorm ⛈️',96:'Thunderstorm+hail ⛈️',99:'Thunderstorm+hail ⛈️'};
 const wDesc=c=>WMO[c]||'Condition '+c;
 
-// ════════════════════════════════
+// ═══════════════════════════════
 //  STORAGE
-// ════════════════════════════════
+// ═══════════════════════════════
 function loadStore(){
   try{
     const k=JSON.parse(localStorage.getItem('atmo_k')||'{}');
@@ -515,9 +494,21 @@ const saveKeys=()=>localStorage.setItem('atmo_k',JSON.stringify({a:S.keys.airnow
 const saveLoc=()=>localStorage.setItem('atmo_l',JSON.stringify({lat:S.lat,lng:S.lng,n:S.locName}));
 const saveLogs=()=>localStorage.setItem('atmo_log',JSON.stringify(S.logs));
 
-// ════════════════════════════════
+// Collapse state persistence
+function loadCollapseState(){
+  try{return JSON.parse(localStorage.getItem('atmo_col')||'{}');}catch{return{};}
+}
+function saveCollapseState(id,collapsed){
+  try{
+    const st=loadCollapseState();
+    st[id]=collapsed;
+    localStorage.setItem('atmo_col',JSON.stringify(st));
+  }catch{}
+}
+
+// ═══════════════════════════════
 //  HELPERS
-// ════════════════════════════════
+// ═══════════════════════════════
 const cF=c=>Math.round(c*9/5+32);
 const fT=c=>S.useFahrenheit?`${cF(c)}°F`:`${Math.round(c)}°C`;
 const fTs=c=>S.useFahrenheit?`${cF(c)}°`:`${Math.round(c)}°`;
@@ -528,21 +519,23 @@ const esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'
 const uvLabel=v=>v==null?'—':v<=2?'Low':v<=5?'Moderate':v<=7?'High':v<=10?'Very High':'Extreme';
 const aqCat=v=>v<=50?'Good':v<=100?'Moderate':v<=150?'Unhealthy for Sensitive Groups':v<=200?'Unhealthy':v<=300?'Very Unhealthy':'Hazardous';
 const aqCol=v=>v<=50?'var(--good)':v<=100?'#9a9a20':v<=150?'var(--warn)':v<=200?'var(--bad)':v<=300?'#8f3f97':'#7e0023';
-// pollen index 0-4 → colour
 const polCol=v=>['var(--good)','#80c840','var(--warn)','#e07020','var(--bad)'][Math.min(4,Math.max(0,v))];
 const polCatName=v=>['None','Very Low','Low','Moderate','High','Very High'][Math.min(5,Math.max(0,v))];
+const omPolScale=v=>v<=0?0:v<=10?1:v<=50?2:v<=200?3:4;
+const omAQLabel=pm=>pm<=12?'Good':pm<=35?'Moderate':pm<=55?'USG':pm<=150?'Unhealthy':'V.Unhealthy';
+const omAQCol  =pm=>pm<=12?'var(--good)':pm<=35?'#9a9a20':pm<=55?'var(--warn)':pm<=150?'var(--bad)':'#8f3f97';
 
-// ════════════════════════════════
-//  DIAG (settings badge)
-// ════════════════════════════════
+// ═══════════════════════════════
+//  DIAG
+// ═══════════════════════════════
 function diagSet(key,state,msg){
   const b=document.getElementById('st-'+key);
   if(b){b.className='stbadge '+(state==='ok'?'stok':state==='err'?'sterr':'stload');b.textContent=msg;}
 }
 
-// ════════════════════════════════
-//  LOADERS / ERRORS
-// ════════════════════════════════
+// ═══════════════════════════════
+//  LOADERS
+// ═══════════════════════════════
 function ldrShow(id){
   const e=document.getElementById('ldr-'+id);
   if(e){const m=e.querySelector('.ldr-msg');if(m)m.textContent='Loading…';const d=e.querySelector('.ldr-detail');if(d){d.textContent='';d.style.display='none';}e.classList.remove('off');}
@@ -557,16 +550,11 @@ function showCardErr(id,msg){
   });
 }
 function showSetup(){['cur','fcast','poll','aq'].forEach(id=>showCardErr(id,'Set your location to begin'));}
+async function safeFetch(url,opts){const r=await fetch(url,opts||{});if(!r.ok)throw new Error('HTTP '+r.status);return r.json();}
 
-async function safeFetch(url,opts){
-  const r=await fetch(url,opts||{});
-  if(!r.ok)throw new Error('HTTP '+r.status);
-  return r.json();
-}
-
-// ════════════════════════════════
+// ═══════════════════════════════
 //  NWS
-// ════════════════════════════════
+// ═══════════════════════════════
 const NWS_H={'User-Agent':'atmosphere-dashboard/1.0 (personal health tracker; noreply@example.com)','Accept':'application/geo+json'};
 
 async function nwsPoints(){
@@ -574,6 +562,14 @@ async function nwsPoints(){
   const d=await safeFetch(`https://api.weather.gov/points/${lat.toFixed(4)},${lng.toFixed(4)}`,{headers:NWS_H});
   if(!d.properties?.forecastHourly)throw new Error('NWS: no forecast URLs');
   return d.properties;
+}
+
+async function fetchOMSupplement(){
+  try{
+    const{lat,lng}=S;
+    const d=await safeFetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lng}&current=uv_index,dew_point_2m,surface_pressure,visibility&temperature_unit=fahrenheit&timezone=auto`);
+    return d.current;
+  }catch{return null;}
 }
 
 async function fetchWeather(){
@@ -591,8 +587,7 @@ async function fetchWeather(){
     const cur=periods[0];
     const tempF=cur.temperature;
     S.weather={
-      source:'nws',
-      tempF,tempC:(tempF-32)*5/9,
+      source:'nws',tempF,tempC:(tempF-32)*5/9,
       feelsF:cur.windChill?.value??cur.heatIndex?.value??null,
       feelsC:null,
       humidity:cur.relativeHumidity?.value??null,
@@ -608,7 +603,6 @@ async function fetchWeather(){
       startTime:cur.startTime,
     };
     S.weather.feelsC=S.weather.feelsF!=null?(S.weather.feelsF-32)*5/9:null;
-    // Store NWS hourly for hourly forecast tab (next 24 periods)
     S.forecastHourly=periods.slice(0,24);
     diagSet('weather','ok','NWS ✓'+(omRes?' + Open-Meteo':''));
     renderWeather(S.weather);
@@ -626,23 +620,14 @@ async function fetchForecast(){
     if(!periods?.length)throw new Error('NWS: no periods');
     S.forecast=periods;
     diagSet('forecast','ok','NWS ✓');
-    renderFcastTab(); // render whichever tab is active
+    renderForecast();
   }catch(e){diagSet('forecast','err',e.message);showCardErr('fcast','Forecast: '+e.message);}
-}
-
-async function fetchOMSupplement(){
-  try{
-    const{lat,lng}=S;
-    const d=await safeFetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lng}&current=uv_index,dew_point_2m,surface_pressure,visibility&temperature_unit=fahrenheit&timezone=auto`);
-    return d.current;
-  }catch{return null;}
 }
 
 function nwsIcon(desc,day){
   const d=desc.toLowerCase();
   if(d.includes('tornado')||d.includes('hurricane'))return'🌪️';
   if(d.includes('thunder')||d.includes('t-storm'))return'⛈️';
-  if(d.includes('hail'))return'🌨️';
   if(d.includes('blizzard')||d.includes('heavy snow'))return'❄️';
   if(d.includes('snow')||d.includes('flurr'))return'🌨️';
   if(d.includes('sleet')||d.includes('freezing'))return'🌧️';
@@ -657,39 +642,56 @@ function nwsIcon(desc,day){
   return day?'🌤️':'🌙';
 }
 
-// ════════════════════════════════
+// ═══════════════════════════════
 //  AIR QUALITY
-// ════════════════════════════════
+// ═══════════════════════════════
 async function fetchAQ(){
   const{lat,lng}=S;
   if(!S.keys.airnow){
     diagSet('aq','err','Add AirNow key in Settings ⚙');
     showCardErr('aq','Add AirNow key in Settings ⚙');
-    // Still try to get OM AQ forecast for forecast tabs
     fetchAQForecast();
     return;
   }
   diagSet('aq','loading','Fetching…');
+  // Try direct first (works from HTTPS/GitHub Pages), fall back to proxy
+  const direct=`https://www.airnowapi.org/aq/observation/latLong/current/?format=application/json&latitude=${lat}&longitude=${lng}&distance=25&API_KEY=${S.keys.airnow}`;
+  let data=null;
   try{
-    const direct=`https://www.airnowapi.org/aq/observation/latLong/current/?format=application/json&latitude=${lat}&longitude=${lng}&distance=25&API_KEY=${S.keys.airnow}`;
-    const url=`https://corsproxy.io/?url=${encodeURIComponent(direct)}`;
-    const r=await fetch(url);
-    if(!r.ok)throw new Error('AirNow HTTP '+r.status);
-    const data=await r.json();
-    if(!Array.isArray(data))throw new Error('Unexpected AirNow format');
-    if(data.length===0)throw new Error('No AirNow observations within 25 mi');
-    S.aq=data;
-    diagSet('aq','ok','AirNow ✓');
-    renderAQ(data);
-    renderAlerts(); // refresh alerts strip now that AQ is available
-  }catch(e){
-    diagSet('aq','err',e.message);
-    showCardErr('aq','Air Quality: '+e.message);
+    const r=await fetch(direct);
+    if(r.ok){
+      const d=await r.json();
+      if(Array.isArray(d))data=d;
+    }
+  }catch(e){console.warn('AirNow direct failed, trying proxy:',e.message);}
+  if(!data){
+    try{
+      const proxy=`https://corsproxy.io/?url=${encodeURIComponent(direct)}`;
+      const r=await fetch(proxy);
+      if(!r.ok)throw new Error('AirNow proxy HTTP '+r.status);
+      const d=await r.json();
+      if(!Array.isArray(d))throw new Error('Unexpected AirNow format');
+      data=d;
+    }catch(e){
+      diagSet('aq','err',e.message);
+      showCardErr('aq','Air Quality: '+e.message);
+      fetchAQForecast();
+      return;
+    }
   }
+  if(!data.length){
+    diagSet('aq','err','No observations within 25 mi');
+    showCardErr('aq','No AirNow observations within 25 mi');
+    fetchAQForecast();
+    return;
+  }
+  S.aq=data;
+  diagSet('aq','ok','AirNow ✓');
+  renderAQ(data);
+  renderAlerts();
   fetchAQForecast();
 }
 
-// Open-Meteo AQ: hourly PM2.5, PM10, ozone, NO2 — 3 days
 async function fetchAQForecast(){
   const{lat,lng}=S;
   try{
@@ -698,39 +700,56 @@ async function fetchAQForecast(){
       `&hourly=pm2_5,pm10,ozone,nitrogen_dioxide&timezone=auto&forecast_days=3`
     );
     S.aqForecast=d.hourly;
-    renderFcastTab();
+    renderForecast();
   }catch(e){console.warn('AQ forecast',e);}
 }
 
-// ════════════════════════════════
+// ═══════════════════════════════
 //  POLLEN
-// ════════════════════════════════
+// ═══════════════════════════════
 async function fetchPollen(){
   const{lat,lng}=S;
   diagSet('pollen','loading','Fetching…');
   try{
     if(S.keys.pollen){
-      // Google: request 5 days for forecast
       const d=await safeFetch(`https://pollen.googleapis.com/v1/forecast:lookup?key=${S.keys.pollen}&location.longitude=${lng}&location.latitude=${lat}&days=5`);
       diagSet('pollen','ok','Google Pollen ✓');
+      // Build hourly-like structure: spread each day's value across all 24 hours
+      S.pollenForecast=buildGooglePollenForecast(d.dailyInfo||[]);
       renderPollen(d,'google');
     }else{
-      // Open-Meteo: 5 days hourly
       const d=await safeFetch(
         `https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${lat}&longitude=${lng}`+
         `&hourly=grass_pollen,tree_pollen,weed_pollen&timezone=auto&forecast_days=5`
       );
       diagSet('pollen','ok','Open-Meteo ✓');
-      // Store hourly for forecast tab
       S.pollenForecast=d.hourly;
       renderPollen(d,'openmeteo');
     }
   }catch(e){diagSet('pollen','err',e.message);showCardErr('poll','Pollen: '+e.message);}
 }
 
-// ════════════════════════════════
+// Google pollen: spread each day value across all 24 hours so hourly matching works
+function buildGooglePollenForecast(dailyInfo){
+  const time=[],grass=[],tree=[],weed=[];
+  dailyInfo.forEach(day=>{
+    const date=day.date.year+'-'+String(day.date.month).padStart(2,'0')+'-'+String(day.date.day).padStart(2,'0');
+    const types=day.pollenTypeInfo||[];
+    const get=name=>{const t=types.find(x=>(x.displayName||x.code||'').toLowerCase().includes(name));return(t?.indexInfo?.value??0)*50;};
+    const g=get('grass'),tr=get('tree'),w=get('weed');
+    // Emit one entry per hour
+    for(let h=0;h<24;h++){
+      const hh=String(h).padStart(2,'0');
+      time.push(`${date}T${hh}:00`);
+      grass.push(g); tree.push(tr); weed.push(w);
+    }
+  });
+  return{time,grass_pollen:grass,tree_pollen:tree,weed_pollen:weed};
+}
+
+// ═══════════════════════════════
 //  LOAD ALL
-// ════════════════════════════════
+// ═══════════════════════════════
 function loadAll(){
   if(!S.lat||!S.lng){showSetup();return;}
   ldrShow('cur');ldrShow('fcast');ldrShow('poll');ldrShow('aq');
@@ -741,22 +760,17 @@ function loadAll(){
   fetchPollen();
 }
 
-// ════════════════════════════════
-//  RENDER WEATHER
-// ════════════════════════════════
+// ═══════════════════════════════
+//  RENDER WEATHER (compact text)
+// ═══════════════════════════════
 function renderWeather(c){
   const tempF=c.tempF,tempC=c.tempC;
-  const feelsF=c.feelsF,feelsC=c.feelsC;
   const humid=c.humidity,wind=c.windMph,windDir=c.windDir;
-  const uv=c.uv,dewC=c.dewC,pressHpa=c.pressHpa,visM=c.visM;
-
+  const uv=c.uv,dewC=c.dewC;
   const tDisp=S.useFahrenheit?Math.round(tempF):Math.round(tempC);
   const tUnit=S.useFahrenheit?'°F':'°C';
-  const fDisp=feelsF!=null?(S.useFahrenheit?Math.round(feelsF)+'°F':Math.round(feelsC)+'°C'):'—';
-  const dewDisp=dewC!=null?(S.useFahrenheit?Math.round(dewC*9/5+32)+'°F':Math.round(dewC)+'°C'):'—';
-  const visDisp=visM!=null?(visM>=1000?(visM/1000).toFixed(1)+' km':visM+' m'):'—';
-  const presDisp=pressHpa!=null?Math.round(pressHpa)+' hPa':'—';
-
+  const feelsDisp=c.feelsF!=null?(S.useFahrenheit?Math.round(c.feelsF):Math.round(c.feelsC))+'°':null;
+  const dewDisp=dewC!=null?(S.useFahrenheit?Math.round(dewC*9/5+32)+'°F':Math.round(dewC)+'°C'):null;
   const isHot=tempF>95,isCold=tempF<15,isWind=wind>40,isHumid=humid!=null&&humid>85,isUV=uv!=null&&uv>=8;
   const tCol=isHot?'var(--bad)':isCold?'var(--ac2)':'var(--tx)';
   const msgs=[];
@@ -766,125 +780,145 @@ function renderWeather(c){
   if(isUV)msgs.push('Very high UV: '+uv);
   const alertH=msgs.length?`<div class="abar on">&#9888; ${msgs.join(' &middot; ')}</div>`:'';
   const uvW=uv!=null?Math.min(100,(uv/12)*100):0;
-  const uvC=uv>=8?'var(--bad)':uv>=6?'var(--warn)':'var(--good)';
-  const uvDisp=uv!=null?`${uv} — ${uvLabel(uv)}`:'— (no supplement data)';
-  const badgeCls=msgs.length?'badge bb':'badge bg';
-  const badgeTxt=msgs.length?'Extreme':'Normal';
-  const windDisp=wind?wind+' mph '+(windDir||''):'—';
+  const uvFillCol=uv>=8?'var(--bad)':uv>=6?'var(--warn)':'var(--good)';
+
+  const statLines=[];
+  if(feelsDisp) statLines.push(`<div class="cur-stat-line"><span class="icon">🌡️</span><span>Feels like</span><span class="val">${feelsDisp}</span></div>`);
+  if(humid!=null) statLines.push(`<div class="cur-stat-line"><span class="icon">💧</span><span>Humidity</span><span class="val${isHumid?' wn':''}">${humid}%</span></div>`);
+  if(wind) statLines.push(`<div class="cur-stat-line"><span class="icon">💨</span><span>Wind</span><span class="val${isWind?' wn':''}">${wind} mph ${windDir}</span></div>`);
+  if(dewDisp) statLines.push(`<div class="cur-stat-line"><span class="icon">🌫️</span><span>Dew point</span><span class="val">${dewDisp}</span></div>`);
+  if(uv!=null) statLines.push(`<div class="cur-stat-line"><span class="icon">☀️</span><span>UV ${uv} — ${uvLabel(uv)}</span><span class="uvbar"><div class="uvfill" style="width:${uvW}%;background:${uvFillCol}"></div></span></div>`);
 
   const html=`
     ${alertH}
-    <div class="bigT" style="color:${tCol}">${tDisp}<sup>${tUnit}</sup></div>
-    <div class="cdesc">${c.icon} ${c.desc}</div>
-    <div class="sgrid">
-      <div class="stat"><div class="slbl">Feels like</div><div class="sval">${fDisp}</div></div>
-      <div class="stat"><div class="slbl">Humidity</div><div class="sval${isHumid?' wn':''}">${humid!=null?humid+'%':'—'}</div></div>
-      <div class="stat"><div class="slbl">Wind</div><div class="sval${isWind?' wn':''}">${windDisp}</div></div>
-      <div class="stat"><div class="slbl">Pressure</div><div class="sval">${presDisp}</div></div>
-      <div class="stat"><div class="slbl">Visibility</div><div class="sval">${visDisp}</div></div>
-      <div class="stat"><div class="slbl">Dew point</div><div class="sval">${dewDisp}</div></div>
-      <div class="stat" style="grid-column:1/-1">
-        <div class="slbl">UV Index</div>
-        <div class="sval">${uvDisp}</div>
-        <div class="uvbar"><div class="uvfill" style="width:${uvW}%;background:${uvC}"></div></div>
-      </div>
-    </div>`;
+    <div class="cur-temp-row">
+      <div class="bigT" style="color:${tCol}">${tDisp}<sup>${tUnit}</sup></div>
+    </div>
+    <div class="cur-desc-row">${c.icon} ${c.desc}</div>
+    <div class="cur-stats">${statLines.join('')}</div>`;
   const ts='Updated '+new Date().toLocaleTimeString();
   setInner('cur-body',html); setInner('m-cur-body',html);
-  setBadge('cur-badge',badgeCls,badgeTxt); setBadge('m-cur-badge',badgeCls,badgeTxt);
+  setBadge('cur-badge',msgs.length?'badge bb':'badge bg',msgs.length?'Extreme':'Normal');
+  setBadge('m-cur-badge',msgs.length?'badge bb':'badge bg',msgs.length?'Extreme':'Normal');
   setTxt('cur-ts',ts); setTxt('m-cur-ts',ts);
   ldrHide('cur');
   document.getElementById('nd-now')?.classList.toggle('on',msgs.length>0);
 }
 
-// ════════════════════════════════
-//  RENDER ALERTS STRIP
-// ════════════════════════════════
+// ═══════════════════════════════
+//  RENDER ALERTS
+// ═══════════════════════════════
 function renderAlerts(){
   const items=[];
-
-  // AQ: show anything with AQI > 100 (Moderate threshold)
   if(S.aq?.length){
     S.aq.forEach(o=>{
       if(o.AQI>100){
         const lvl=o.AQI>200?'vhi':o.AQI>150?'hi':'mod';
-        const col=aqCol(o.AQI);
-        items.push({icon:'💨',name:o.ParameterName,cat:o.Category?.Name||aqCat(o.AQI),badge:o.AQI+' AQI',lvl,col});
+        items.push({icon:'💨',name:o.ParameterName,cat:o.Category?.Name||aqCat(o.AQI),badge:o.AQI+' AQI',lvl});
       }
     });
   }
-
-  // Pollen: show index ≥ 2 (Moderate)
   if(S.pollenTypes?.length){
     S.pollenTypes.forEach(t=>{
       if(t.idx>=2){
         const lvl=t.idx>=4?'vhi':t.idx>=3?'hi':'mod';
-        items.push({icon:'🌿',name:t.name+' Pollen',cat:t.cat||polCatName(t.idx),badge:polCatName(t.idx),lvl,col:polCol(t.idx)});
+        items.push({icon:'🌿',name:t.name+' Pollen',cat:t.cat||polCatName(t.idx),badge:polCatName(t.idx),lvl});
       }
     });
   }
-
-  const alertBadgeCls=items.length?(items.some(i=>i.lvl==='vhi')?'badge bb':items.some(i=>i.lvl==='hi')?'badge bw':'badge bw'):'badge bg';
-  const alertBadgeTxt=items.length?items.length+' elevated':'All clear';
-  setBadge('alerts-badge',alertBadgeCls,alertBadgeTxt);
-  setBadge('m-alerts-badge',alertBadgeCls,alertBadgeTxt);
+  const cls=items.length?(items.some(i=>i.lvl==='vhi')?'badge bb':'badge bw'):'badge bg';
+  const txt=items.length?items.length+' elevated':'All clear';
+  setBadge('alerts-badge',cls,txt); setBadge('m-alerts-badge',cls,txt);
   document.getElementById('nd-now')?.classList.toggle('on',items.some(i=>i.lvl==='vhi'));
-
-  if(!items.length){
-    const h='<div class="alerts-empty">&#10003; No elevated allergens or pollutants right now</div>';
-    setInner('alerts-body',h); setInner('m-alerts-body',h);
-    return;
-  }
-  const html=`<div class="alerts-strip">${items.map(i=>`
-    <div class="alert-item lvl-${i.lvl}">
-      <span class="alert-icon">${i.icon}</span>
-      <span class="alert-info"><span class="alert-name">${i.name}</span><div class="alert-cat">${i.cat}</div></span>
-      <span class="alert-badge">${i.badge}</span>
-    </div>`).join('')}</div>`;
-  setInner('alerts-body',html); setInner('m-alerts-body',html);
+  const h=items.length
+    ?'<div class="alerts-strip">'+items.map(i=>`<div class="alert-item lvl-${i.lvl}"><span class="alert-icon">${i.icon}</span><span class="alert-info"><span class="alert-name">${i.name}</span><div class="alert-cat">${i.cat}</div></span><span class="alert-badge">${i.badge}</span></div>`).join('')+'</div>'
+    :'<div class="alerts-empty">&#10003; No elevated allergens or pollutants right now</div>';
+  setInner('alerts-body',h); setInner('m-alerts-body',h);
 }
 
-// ════════════════════════════════
-//  FORECAST — unified Daily + Hourly
-// ════════════════════════════════
-
-// Pollen scale: grains/m3 -> 0-4
-const omPolScale=v=>v<=0?0:v<=10?1:v<=50?2:v<=200?3:4;
-// PM2.5 ug/m3 -> label + colour
-const omAQLabel=pm=>pm<=12?'Good':pm<=35?'Moderate':pm<=55?'USG':pm<=150?'Unhealthy':'V.Unhealthy';
-const omAQCol  =pm=>pm<=12?'var(--good)':pm<=35?'#9a9a20':pm<=55?'var(--warn)':pm<=150?'var(--bad)':'#8f3f97';
-
-function renderFcastTab(){
-  const tab=S.fcastTab;
-  let html='',ts='';
-  if(tab==='daily'){html=buildDaily();ts='NWS + Open-Meteo';}
-  else{html=buildHourly();ts='NWS + Open-Meteo hourly';}
+// ═══════════════════════════════
+//  RENDER FORECAST (hourly above daily, no tabs)
+// ═══════════════════════════════
+function renderForecast(){
+  const hourlyHtml=S.forecastHourly ? buildHourlyRow() : '<div class="nodata">Hourly weather loading…</div>';
+  const dailyHtml =S.forecast       ? buildDailyRow()  : '<div class="nodata">Daily forecast loading…</div>';
+  const html=
+    '<div class="fcast-section-lbl">Hourly</div>'+hourlyHtml+
+    '<div class="fcast-section-lbl" style="margin-top:14px">Daily</div>'+dailyHtml;
+  const ts='Updated '+new Date().toLocaleTimeString();
   setInner('fcast-body',html); setInner('m-fcast-body',html);
   setTxt('fcast-ts',ts); setTxt('m-fcast-ts',ts);
   ldrHide('fcast');
 }
 
-function polMaxForDate(h,date){
-  if(!h)return{grass:0,tree:0,weed:0};
-  const acc={grass:0,tree:0,weed:0};
-  (h.time||[]).forEach((t,i)=>{
-    if(!t.startsWith(date))return;
-    acc.grass=Math.max(acc.grass,h.grass_pollen?.[i]||0);
-    acc.tree =Math.max(acc.tree, h.tree_pollen?.[i] ||0);
-    acc.weed =Math.max(acc.weed, h.weed_pollen?.[i] ||0);
+// Key: match Open-Meteo "YYYY-MM-DDTHH:MM" to NWS "YYYY-MM-DDTHH:00:00±HH:MM"
+// Use UTC comparison: parse NWS time fully, get UTC hour string
+function nwsToUtcHourKey(startTime){
+  // e.g. "2025-04-05T14:00:00-05:00" → UTC "2025-04-05T19"
+  const d=new Date(startTime);
+  const y=d.getUTCFullYear(),mo=String(d.getUTCMonth()+1).padStart(2,'0');
+  const dy=String(d.getUTCDate()).padStart(2,'0'),hr=String(d.getUTCHours()).padStart(2,'0');
+  return`${y}-${mo}-${dy}T${hr}`;
+}
+function omTimeToUtcHourKey(t){
+  // Open-Meteo: "2025-04-05T19:00" — treat as UTC
+  return t.slice(0,13); // "2025-04-05T19"
+}
+
+function pollenForKey(utcKey){
+  if(!S.pollenForecast)return null;
+  const idx=S.pollenForecast.time.findIndex(t=>omTimeToUtcHourKey(t)===utcKey);
+  if(idx<0)return null;
+  return{
+    gi:omPolScale(S.pollenForecast.grass_pollen?.[idx]||0),
+    ti:omPolScale(S.pollenForecast.tree_pollen?.[idx]||0),
+    wi:omPolScale(S.pollenForecast.weed_pollen?.[idx]||0),
+  };
+}
+function aqForKey(utcKey){
+  if(!S.aqForecast)return null;
+  const idx=S.aqForecast.time.findIndex(t=>omTimeToUtcHourKey(t)===utcKey);
+  if(idx<0)return null;
+  return S.aqForecast.pm2_5?.[idx]??null;
+}
+
+function buildHourlyRow(){
+  let html='';
+  (S.forecastHourly||[]).forEach((p,i)=>{
+    const dt=new Date(p.startTime);
+    const label=dt.toLocaleTimeString('en-US',{hour:'numeric',hour12:true}).replace(/\s+/g,'');
+    const tF=p.temperature;
+    const tD=S.useFahrenheit?tF+'\xb0':Math.round((tF-32)*5/9)+'\xb0';
+    const wxIcon=nwsIcon(p.shortForecast||'',p.isDaytime);
+    const prcp=p.probabilityOfPrecipitation?.value;
+    const prcpD=prcp!=null&&prcp>0?'<div class="fdr">&#128167;'+prcp+'%</div>':'';
+    const utcKey=nwsToUtcHourKey(p.startTime);
+    const pol=pollenForKey(utcKey);
+    const pm25=aqForKey(utcKey);
+    const polHtml=pol
+      ?('<div class="fd-sect pol">'
+        +'<div class="fdslbl">&#127807;</div>'
+        +'<div class="fdpi"><span class="dot" style="background:'+polCol(pol.gi)+'"></span>G</div>'
+        +'<div class="fdpi"><span class="dot" style="background:'+polCol(pol.ti)+'"></span>T</div>'
+        +'<div class="fdpi"><span class="dot" style="background:'+polCol(pol.wi)+'"></span>W</div>'
+        +'</div>')
+      :'';
+    const aqHtml=pm25!=null
+      ?('<div class="fd-sect aqi">'
+        +'<div class="fdslbl">&#128168;</div>'
+        +'<div class="fdpi" style="color:'+omAQCol(pm25)+'">'+Math.round(pm25)+'</div>'
+        +'</div>')
+      :'';
+    const worst=pol?Math.max(pol.gi,pol.ti,pol.wi):0;
+    const xw=worst>=4||(pm25!=null&&pm25>55);
+    html+='<div class="fd'+(i===0?' td':'')+(xw?' fw':'')+'"><div class="fddot"></div>'
+      +'<div class="fd-sect wx"><div class="fdn">'+label+'</div><div class="fdi">'+wxIcon+'</div><div class="fdh">'+tD+'</div>'+prcpD+'</div>'
+      +polHtml+aqHtml+'</div>';
   });
-  return acc;
+  return'<div class="frow frow-hourly">'+html+'</div>';
 }
 
-function aqMaxForDate(h,date){
-  if(!h)return null;
-  let mx=0;
-  (h.time||[]).forEach((t,i)=>{if(t.startsWith(date))mx=Math.max(mx,h.pm2_5?.[i]||0);});
-  return mx;
-}
-
-function buildDaily(){
-  if(!S.forecast)return'<div class="nodata">Weather data not yet loaded</div>';
+function buildDailyRow(){
   const periods=S.forecast;
   const days=[];
   for(let i=0;i<periods.length&&days.length<7;i++){
@@ -904,98 +938,45 @@ function buildDaily(){
     const wxIcon=nwsIcon(p.shortForecast||'',true);
     const prcp=p.probabilityOfPrecipitation?.value;
     const prcpD=prcp!=null&&prcp>0?'<div class="fdr">&#128167;'+Math.round(prcp)+'%</div>':'';
-    // pollen
-    const pol=polMaxForDate(S.pollenForecast,date);
-    const gi=omPolScale(pol.grass),ti=omPolScale(pol.tree),wi=omPolScale(pol.weed);
-    const polWorst=Math.max(gi,ti,wi);
-    const polHtml=S.pollenForecast
-      ?('<div class="fd-section fd-poll">'
-        +'<div class="fd-sec-lbl">&#127807; Pollen</div>'
-        +'<div class="fdpi"><span style="background:'+polCol(gi)+'"></span>Grass</div>'
-        +'<div class="fdpi"><span style="background:'+polCol(ti)+'"></span>Tree</div>'
-        +'<div class="fdpi"><span style="background:'+polCol(wi)+'"></span>Weed</div>'
+    // Pollen: take noon UTC value for the day
+    const noonUtc=date+'T12';
+    const pol=pollenForKey(noonUtc);
+    const polHtml=pol
+      ?('<div class="fd-sect pol">'
+        +'<div class="fdslbl">&#127807; Pollen</div>'
+        +'<div class="fdpi"><span class="dot" style="background:'+polCol(pol.gi)+'"></span>Grass</div>'
+        +'<div class="fdpi"><span class="dot" style="background:'+polCol(pol.ti)+'"></span>Tree</div>'
+        +'<div class="fdpi"><span class="dot" style="background:'+polCol(pol.wi)+'"></span>Weed</div>'
         +'</div>')
       :'';
-    // AQ
-    const pm25=aqMaxForDate(S.aqForecast,date);
-    const aqHtml=pm25!=null
-      ?('<div class="fd-section fd-aq">'
-        +'<div class="fd-sec-lbl">&#128168; Air</div>'
-        +'<div class="fdpi" style="color:'+omAQCol(pm25)+'">'+omAQLabel(pm25)+'</div>'
-        +'<div class="fdpi">PM2.5 '+Math.round(pm25)+'</div>'
+    // AQ: max pm2.5 for the day
+    let maxPm=null;
+    if(S.aqForecast){
+      S.aqForecast.time.forEach((t,ii)=>{
+        if(t.startsWith(date)){const v=S.aqForecast.pm2_5?.[ii]??0;if(maxPm===null||v>maxPm)maxPm=v;}
+      });
+    }
+    const aqHtml=maxPm!=null
+      ?('<div class="fd-sect aqi">'
+        +'<div class="fdslbl">&#128168; Air</div>'
+        +'<div class="fdpi" style="color:'+omAQCol(maxPm)+'">'+omAQLabel(maxPm)+'</div>'
+        +'<div class="fdpi">PM2.5 '+Math.round(maxPm)+'</div>'
         +'</div>')
       :'';
-    const xa=hiF>100||(loF!=null&&loF<5),xw=hiF>92||polWorst>=4||(prcp!=null&&prcp>70);
+    const worst=pol?Math.max(pol.gi,pol.ti,pol.wi):0;
+    const xa=hiF>100||(loF!=null&&loF<5),xw=hiF>92||worst>=4||(prcp!=null&&prcp>70);
     if(xa)hasAlert=true;
-    html+='<div class="fd fd-combined'+(i===0?' td':'')+(xa?' fa':xw?' fw':'')+'"><div class="fddot"></div>'
-      +'<div class="fd-section fd-wx"><div class="fdn">'+name+'</div><div class="fdi">'+wxIcon+'</div><div class="fdh">'+hiD+'</div><div class="fdl">'+loD+'</div>'+prcpD+'</div>'
+    html+='<div class="fd'+(i===0?' td':'')+(xa?' fa':xw?' fw':'')+'"><div class="fddot"></div>'
+      +'<div class="fd-sect wx"><div class="fdn">'+name+'</div><div class="fdi">'+wxIcon+'</div><div class="fdh">'+hiD+'</div><div class="fdl">'+loD+'</div>'+prcpD+'</div>'
       +polHtml+aqHtml+'</div>';
   });
   document.getElementById('nd-fcast')?.classList.toggle('on',hasAlert);
   return'<div class="frow frow-daily">'+html+'</div>';
 }
 
-function buildHourly(){
-  if(!S.forecastHourly)return'<div class="nodata">Hourly weather not yet loaded</div>';
-  let html='',count=0;
-  S.forecastHourly.forEach((p,i)=>{
-    if(count>=24)return;
-    const dt=new Date(p.startTime);
-    const label=dt.toLocaleTimeString('en-US',{hour:'numeric',hour12:true}).replace(/\s+/g,'');
-    const tF=p.temperature;
-    const tD=S.useFahrenheit?tF+'\xb0':Math.round((tF-32)*5/9)+'\xb0';
-    const wxIcon=nwsIcon(p.shortForecast||'',p.isDaytime);
-    const prcp=p.probabilityOfPrecipitation?.value;
-    const prcpD=prcp!=null&&prcp>0?'<div class="fdr">&#128167;'+prcp+'%</div>':'';
-    // Match pollen + AQ by ISO date+hour prefix "YYYY-MM-DDTHH"
-    const dtKey=p.startTime.slice(0,13);
-    let gi=0,ti=0,wi=0,polOk=false;
-    if(S.pollenForecast){
-      const pi=(S.pollenForecast.time||[]).findIndex(t=>t.slice(0,13)===dtKey);
-      if(pi>=0){gi=omPolScale(S.pollenForecast.grass_pollen?.[pi]||0);ti=omPolScale(S.pollenForecast.tree_pollen?.[pi]||0);wi=omPolScale(S.pollenForecast.weed_pollen?.[pi]||0);polOk=true;}
-    }
-    const polHtml=polOk
-      ?('<div class="fd-section fd-poll">'
-        +'<div class="fd-sec-lbl">&#127807;</div>'
-        +'<div class="fdpi"><span style="background:'+polCol(gi)+'"></span>G</div>'
-        +'<div class="fdpi"><span style="background:'+polCol(ti)+'"></span>T</div>'
-        +'<div class="fdpi"><span style="background:'+polCol(wi)+'"></span>W</div>'
-        +'</div>')
-      :'';
-    let pm25=null,aqOk=false;
-    if(S.aqForecast){
-      const ai=(S.aqForecast.time||[]).findIndex(t=>t.slice(0,13)===dtKey);
-      if(ai>=0){pm25=S.aqForecast.pm2_5?.[ai]||0;aqOk=true;}
-    }
-    const aqHtml=aqOk
-      ?('<div class="fd-section fd-aq">'
-        +'<div class="fd-sec-lbl">&#128168;</div>'
-        +'<div class="fdpi" style="color:'+omAQCol(pm25)+'">'+Math.round(pm25)+'</div>'
-        +'</div>')
-      :'';
-    const xw=Math.max(gi,ti,wi)>=4||(pm25!=null&&pm25>55);
-    html+='<div class="fd fd-combined'+(i===0?' td':'')+(xw?' fw':'')+'"><div class="fd-section fd-wx"><div class="fdn">'+label+'</div><div class="fdi">'+wxIcon+'</div><div class="fdh">'+tD+'</div>'+prcpD+'</div>'+polHtml+aqHtml+'</div>';
-    count++;
-  });
-  return'<div class="frow frow-hourly">'+(html||'<div class="nodata">No data</div>')+'</div>';
-}
-
-function buildGooglePollenForecast(dailyInfo){
-  const time=[],grass=[],tree=[],weed=[];
-  dailyInfo.forEach(day=>{
-    const date=day.date.year+'-'+String(day.date.month).padStart(2,'0')+'-'+String(day.date.day).padStart(2,'0');
-    time.push(date+'T12:00');
-    const types=day.pollenTypeInfo||[];
-    const get=name=>{const t=types.find(x=>(x.displayName||x.code||'').toLowerCase().includes(name));return(t?.indexInfo?.value??0)*50;};
-    grass.push(get('grass'));tree.push(get('tree'));weed.push(get('weed'));
-  });
-  return{time,grass_pollen:grass,tree_pollen:tree,weed_pollen:weed};
-}
-
-
-// ════════════════════════════════
-//  RENDER AQ (current card)
-// ════════════════════════════════
+// ═══════════════════════════════
+//  RENDER AQ
+// ═══════════════════════════════
 function renderAQ(data){
   S.aq=data;
   const top=data.reduce((a,b)=>b.AQI>a.AQI?b:a);
@@ -1004,12 +985,7 @@ function renderAQ(data){
   const badgeCls=aqi>150?'badge bb':aqi>100?'badge bw':'badge bg';
   const badgeTxt=aqi>150?'Unhealthy':aqi>100?'Sensitive':'Good';
   const items=data.map(o=>`<div class="pitem"><span class="piname">${o.ParameterName}</span><span class="pival" style="color:${aqCol(o.AQI)}">${o.AQI} <span class="piunit">${o.Category?.Name||''}</span></span></div>`).join('');
-  const html=`
-    <div class="aqnum" style="color:${col}">${aqi}</div>
-    <div class="aqcat" style="color:${col}">${cat}</div>
-    <div class="aqscale"><div class="aqptr" style="left:${ptr}%"></div></div>
-    <div class="aqlbls"><span>Good</span><span>Moderate</span><span>Unhealthy</span><span>Hazardous</span></div>
-    <div class="plist">${items}</div>`;
+  const html=`<div class="aqnum" style="color:${col}">${aqi}</div><div class="aqcat" style="color:${col}">${cat}</div><div class="aqscale"><div class="aqptr" style="left:${ptr}%"></div></div><div class="aqlbls"><span>Good</span><span>Moderate</span><span>Unhealthy</span><span>Hazardous</span></div><div class="plist">${items}</div>`;
   const ts='Updated '+new Date().toLocaleTimeString();
   setInner('aq-body',html); setInner('m-aq-body',html);
   setBadge('aq-badge',badgeCls,badgeTxt); setBadge('m-aq-badge',badgeCls,badgeTxt);
@@ -1017,9 +993,9 @@ function renderAQ(data){
   ldrHide('aq');
 }
 
-// ════════════════════════════════
-//  RENDER POLLEN (current card)
-// ════════════════════════════════
+// ═══════════════════════════════
+//  RENDER POLLEN
+// ═══════════════════════════════
 function renderPollen(data,source){
   S.pollen=data;
   let types=[];
@@ -1036,15 +1012,10 @@ function renderPollen(data,source){
     const day=(data.dailyInfo||[])[0]||{};
     types=(day.pollenTypeInfo||[]).map(t=>({name:t.displayName||t.code,idx:t.indexInfo?.value??0,cat:t.indexInfo?.category||''}));
     types=types.concat((day.plantInfo||[]).map(p=>({name:p.displayName||p.code,idx:p.indexInfo?.value??0,cat:p.indexInfo?.category||''})));
-    // Store daily for forecast
-    if(!S.pollenForecast && data.dailyInfo?.length>1){
-      // Build synthetic hourly-like structure from daily Google data
-      S.pollenForecast=buildGooglePollenForecast(data.dailyInfo);
-    }
   }else{
     if(Array.isArray(data))types=data.map(t=>({name:t.name||t.Name,idx:Number(t.index||t.idx||0),cat:t.category||t.cat||''}));
   }
-  if(!types.length){showCardErr('poll','No pollen data for this location');return;}
+  if(!types.length){showCardErr('poll','No pollen data');return;}
   S.pollenTypes=types;
   const hasH=types.some(t=>t.idx>=4),hasM=types.some(t=>t.idx>=2);
   const badgeCls=hasH?'badge bb':hasM?'badge bw':'badge bg';
@@ -1059,214 +1030,170 @@ function renderPollen(data,source){
   setBadge('poll-badge',badgeCls,badgeTxt); setBadge('m-poll-badge',badgeCls,badgeTxt);
   setTxt('poll-ts',ts); setTxt('m-poll-ts',ts);
   ldrHide('poll');
-  renderAlerts(); // refresh now that pollen is loaded
-  renderFcastTab();
+  renderAlerts();
+  renderForecast();
 }
 
-// Convert Google daily pollen to hourly-like structure for forecast tabs
-function buildGooglePollenForecast(dailyInfo){
-  const time=[],grass=[],tree=[],weed=[];
-  dailyInfo.forEach(day=>{
-    const date=`${day.date.year}-${String(day.date.month).padStart(2,'0')}-${String(day.date.day).padStart(2,'0')}`;
-    // Use noon as representative time
-    time.push(date+'T12:00');
-    const types=day.pollenTypeInfo||[];
-    const get=name=>{const t=types.find(x=>(x.displayName||x.code||'').toLowerCase().includes(name));return(t?.indexInfo?.value??0)*50;};
-    grass.push(get('grass')); tree.push(get('tree')); weed.push(get('weed'));
-  });
-  return{time,grass_pollen:grass,tree_pollen:tree,weed_pollen:weed};
-}
-
-// ════════════════════════════════
+// ═══════════════════════════════
 //  LOG
-// ════════════════════════════════
+// ═══════════════════════════════
 function renderLog(){
   buildLogUI('log-body-d','erow-d','lnote-d','lbtn-d','lok-d','llist-d');
   buildLogUI('log-body-m','erow-m','lnote-m','lbtn-m','lok-m','llist-m');
   buildLogUI('log-body-ml','erow-ml','lnote-ml','lbtn-ml','lok-ml','llist-ml');
 }
-
 function buildLogUI(bodyId,erId,noteId,btnId,okId,listId){
-  const el=document.getElementById(bodyId); if(!el)return;
-  el.innerHTML=`
-    <div class="erow" id="${erId}"></div>
-    <textarea class="lnote" id="${noteId}" rows="2" placeholder="Optional note…"></textarea>
-    <button class="lbtn" id="${btnId}">Log this moment</button>
-    <div class="lok" id="${okId}">&#10003; Saved!</div>
-    <div class="lhdr">Recent entries</div>
-    <div class="llist" id="${listId}"></div>`;
+  const el=document.getElementById(bodyId);if(!el)return;
+  el.innerHTML=`<div class="erow" id="${erId}"></div><textarea class="lnote" id="${noteId}" rows="2" placeholder="Optional note…"></textarea><button class="lbtn" id="${btnId}">Log this moment</button><div class="lok" id="${okId}">&#10003; Saved!</div><div class="lhdr">Recent entries</div><div class="llist" id="${listId}"></div>`;
   buildEmojiPicker(erId,S.selEmojis);
   document.getElementById(btnId).addEventListener('click',()=>doLog(noteId,btnId,okId));
   renderList(listId);
 }
-
 function doLog(noteId,btnId,okId){
   if(!S.selEmojis.size){alert('Select at least one emoji.');return;}
-  const entry={
-    id:Date.now().toString(),ts:Date.now(),
-    emojis:[...S.selEmojis],
-    note:(document.getElementById(noteId)||{}).value?.trim()||'',
-    cond:captureCond(),loc:S.locName,
-  };
-  S.logs.push(entry); saveLogs();
+  const entry={id:Date.now().toString(),ts:Date.now(),emojis:[...S.selEmojis],note:(document.getElementById(noteId)||{}).value?.trim()||'',cond:captureCond(),loc:S.locName};
+  S.logs.push(entry);saveLogs();
   S.selEmojis.clear();
-  const ni=document.getElementById(noteId); if(ni)ni.value='';
+  const ni=document.getElementById(noteId);if(ni)ni.value='';
   const b=document.getElementById(btnId),ok=document.getElementById(okId);
   if(b&&ok){b.style.display='none';ok.style.display='block';setTimeout(()=>{b.style.display='';ok.style.display='none';},1800);}
-  renderList('llist-d'); renderList('llist-m'); renderList('llist-ml');
-  buildEmojiPicker('erow-d',S.selEmojis); buildEmojiPicker('erow-m',S.selEmojis); buildEmojiPicker('erow-ml',S.selEmojis);
+  renderList('llist-d');renderList('llist-m');renderList('llist-ml');
+  buildEmojiPicker('erow-d',S.selEmojis);buildEmojiPicker('erow-m',S.selEmojis);buildEmojiPicker('erow-ml',S.selEmojis);
 }
-
 function renderList(listId){
-  const el=document.getElementById(listId); if(!el)return;
+  const el=document.getElementById(listId);if(!el)return;
   if(!S.logs.length){el.innerHTML='<div class="nodata">No entries yet</div>';return;}
   const sorted=[...S.logs].sort((a,b)=>b.ts-a.ts);
   el.innerHTML=sorted.map(e=>{
     const dt=new Date(e.ts);
     const ts=dt.toLocaleString('en-US',{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'});
     const noteHtml=e.note?`<span class="lenote">${esc(e.note)}</span>`:'';
-    return`<div class="le" data-id="${e.id}">
-      <div class="letop"><span class="leems">${(e.emojis||[]).join('')}</span>${noteHtml}<span class="lets">${ts}</span></div>
-      <div class="lechips">${condChips(e.cond)}</div>
-      <div class="leact">
-        <button class="abtn" data-a="edit" data-id="${e.id}">Edit</button>
-        <button class="abtn del" data-a="del" data-id="${e.id}">Delete</button>
-      </div>
-    </div>`;
+    return`<div class="le" data-id="${e.id}"><div class="letop"><span class="leems">${(e.emojis||[]).join('')}</span>${noteHtml}<span class="lets">${ts}</span></div><div class="lechips">${condChips(e.cond)}</div><div class="leact"><button class="abtn" data-a="edit" data-id="${e.id}">Edit</button><button class="abtn del" data-a="del" data-id="${e.id}">Delete</button></div></div>`;
   }).join('');
   el.querySelectorAll('[data-a]').forEach(b=>{
     b.addEventListener('click',ev=>{
       ev.preventDefault();ev.stopPropagation();
-      if(b.dataset.a==='edit')openEdit(b.dataset.id); else delLog(b.dataset.id);
+      if(b.dataset.a==='edit')openEdit(b.dataset.id);else delLog(b.dataset.id);
     });
   });
 }
-
 function buildEmojiPicker(id,selSet){
-  const el=document.getElementById(id); if(!el)return;
+  const el=document.getElementById(id);if(!el)return;
   el.innerHTML=EMOJIS.map(({e,l})=>`<button class="ebtn${selSet.has(e)?' sel':''}" data-e="${e}" title="${l}"><span class="ei">${e}</span><span class="el">${l}</span></button>`).join('');
   el.querySelectorAll('.ebtn').forEach(b=>b.addEventListener('click',()=>{
     const em=b.dataset.e;
-    if(selSet.has(em))selSet.delete(em); else selSet.add(em);
+    if(selSet.has(em))selSet.delete(em);else selSet.add(em);
     document.querySelectorAll(`.ebtn[data-e="${em}"]`).forEach(x=>x.classList.toggle('sel',selSet.has(em)));
   }));
 }
-
 function captureCond(){
   const c={};
   if(S.weather){
     const w=S.weather;
-    c.tempF    = w.tempF!=null?+w.tempF.toFixed(1):null;
-    c.tempC    = w.tempC!=null?+w.tempC.toFixed(1):null;
-    c.feelsLikeF= w.feelsF!=null?+w.feelsF.toFixed(1):null;
-    c.feelsLikeC= w.feelsC!=null?+w.feelsC.toFixed(1):null;
-    c.humidity  = w.humidity??null;
-    c.windMph   = w.windMph??null;
-    c.windDir   = w.windDir??null;
-    c.pressureHpa=w.pressHpa??null;
-    c.visibilityM=w.visM??null;
-    c.uv        = w.uv??null;
-    c.uvLabel   = uvLabel(w.uv);
-    c.dewPointC = w.dewC??null;
-    c.dewPointF = w.dewC!=null?+(w.dewC*9/5+32).toFixed(1):null;
-    c.weatherDesc=w.desc??null;
-    c.isDaytime = w.isDaytime??null;
-    c.obsTime   = w.startTime??new Date().toISOString();
+    c.tempF=w.tempF!=null?+w.tempF.toFixed(1):null;c.tempC=w.tempC!=null?+w.tempC.toFixed(1):null;
+    c.feelsLikeF=w.feelsF!=null?+w.feelsF.toFixed(1):null;c.feelsLikeC=w.feelsC!=null?+w.feelsC.toFixed(1):null;
+    c.humidity=w.humidity??null;c.windMph=w.windMph??null;c.windDir=w.windDir??null;
+    c.pressureHpa=w.pressHpa??null;c.visibilityM=w.visM??null;
+    c.uv=w.uv??null;c.uvLabel=uvLabel(w.uv);
+    c.dewPointC=w.dewC??null;c.dewPointF=w.dewC!=null?+(w.dewC*9/5+32).toFixed(1):null;
+    c.weatherDesc=w.desc??null;c.isDaytime=w.isDaytime??null;c.obsTime=w.startTime??new Date().toISOString();
   }
   if(S.aq?.length){
     const top=S.aq.reduce((a,b)=>b.AQI>a.AQI?b:a);
-    c.aqiOverall =top.AQI;
-    c.aqiCategory=top.Category?.Name??null;
-    c.pollutants =S.aq.map(o=>({name:o.ParameterName,aqi:o.AQI,cat:o.Category?.Name??null}));
+    c.aqiOverall=top.AQI;c.aqiCategory=top.Category?.Name??null;
+    c.pollutants=S.aq.map(o=>({name:o.ParameterName,aqi:o.AQI,cat:o.Category?.Name??null}));
   }
-  if(S.pollenTypes?.length){
-    c.pollen=S.pollenTypes.map(t=>({name:t.name,index:t.idx,category:t.cat,raw:t.raw??null}));
-  }
+  if(S.pollenTypes?.length)c.pollen=S.pollenTypes.map(t=>({name:t.name,index:t.idx,category:t.cat,raw:t.raw??null}));
   return c;
 }
-
 function condChips(c){
   if(!c)return'';
   const ch=[];
   if(c.tempF!=null||c.tempC!=null){
     const d=S.useFahrenheit?(c.tempF!=null?Math.round(c.tempF)+'°F':Math.round(c.tempC*9/5+32)+'°F'):(c.tempC!=null?Math.round(c.tempC)+'°C':Math.round((c.tempF-32)*5/9)+'°C');
-    ch.push('&#127777;'+d);
+    ch.push('🌡️'+d);
   }
-  if(c.humidity!=null)    ch.push(c.humidity+'% RH');
-  if(c.windMph!=null)     ch.push('&#128168;'+Math.round(c.windMph)+' mph');
-  if(c.uv!=null)          ch.push('UV '+c.uv+(c.uvLabel?' '+c.uvLabel:''));
-  if(c.aqiOverall!=null)  ch.push('AQI '+c.aqiOverall+(c.aqiCategory?' \u00b7 '+c.aqiCategory:''));
-  if(c.pollen?.length){const w=c.pollen.reduce((a,b)=>b.index>a.index?b:a);if(w.index>0)ch.push('&#127807; '+w.name+' '+w.category);}
-  if(c.weatherDesc)       ch.push(c.weatherDesc);
+  if(c.humidity!=null)ch.push(c.humidity+'% RH');
+  if(c.windMph!=null)ch.push('💨'+Math.round(c.windMph)+' mph');
+  if(c.uv!=null)ch.push('UV '+c.uv+(c.uvLabel?' '+c.uvLabel:''));
+  if(c.aqiOverall!=null)ch.push('AQI '+c.aqiOverall+(c.aqiCategory?' · '+c.aqiCategory:''));
+  if(c.pollen?.length){const w=c.pollen.reduce((a,b)=>b.index>a.index?b:a);if(w.index>0)ch.push('🌿 '+w.name+' '+w.category);}
+  if(c.weatherDesc)ch.push(c.weatherDesc);
   return ch.map(t=>`<span class="lechip">${t}</span>`).join('');
 }
-
 function delLog(id){
   if(!confirm('Delete this entry?'))return;
-  S.logs=S.logs.filter(e=>e.id!==id); saveLogs();
-  renderList('llist-d'); renderList('llist-m'); renderList('llist-ml');
+  S.logs=S.logs.filter(e=>e.id!==id);saveLogs();
+  renderList('llist-d');renderList('llist-m');renderList('llist-ml');
 }
 function openEdit(id){
-  const e=S.logs.find(x=>x.id===id); if(!e)return;
+  const e=S.logs.find(x=>x.id===id);if(!e)return;
   S.editId=id;
   buildEmojiPicker('edit-erow',new Set(e.emojis||[]));
   document.getElementById('edit-note').value=e.note||'';
   document.getElementById('edit-modal').classList.add('on');
 }
 function saveEdit(){
-  const e=S.logs.find(x=>x.id===S.editId); if(!e)return;
+  const e=S.logs.find(x=>x.id===S.editId);if(!e)return;
   const sel=new Set();
   document.querySelectorAll('#edit-erow .ebtn.sel').forEach(b=>sel.add(b.dataset.e));
-  e.emojis=[...sel]; e.note=document.getElementById('edit-note').value.trim();
-  saveLogs(); renderList('llist-d'); renderList('llist-m'); renderList('llist-ml');
+  e.emojis=[...sel];e.note=document.getElementById('edit-note').value.trim();
+  saveLogs();renderList('llist-d');renderList('llist-m');renderList('llist-ml');
   document.getElementById('edit-modal').classList.remove('on');
 }
 function exportLogs(){
   const blob=new Blob([JSON.stringify(S.logs,null,2)],{type:'application/json'});
-  const a=document.createElement('a'); a.href=URL.createObjectURL(blob);
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);
   a.download='atmosphere-log-'+new Date().toISOString().slice(0,10)+'.json';
-  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  document.body.appendChild(a);a.click();document.body.removeChild(a);
 }
 
-// ════════════════════════════════
-//  FORECAST TABS WIRING
-// ════════════════════════════════
-function wireTabGroup(containerId){
-  const c=document.getElementById(containerId); if(!c)return;
-  c.querySelectorAll('.ftab').forEach(btn=>{
-    btn.addEventListener('click',()=>{
-      S.fcastTab=btn.dataset.tab;
-      // Update all tab groups (desktop + mobile stay in sync)
-      document.querySelectorAll('.ftab').forEach(t=>t.classList.toggle('on',t.dataset.tab===S.fcastTab));
-      renderFcastTab();
+// ═══════════════════════════════
+//  COLLAPSIBLE — all .card.collapsible
+// ═══════════════════════════════
+function initCollapsibles(){
+  const saved=loadCollapseState();
+  document.querySelectorAll('.card.collapsible').forEach(card=>{
+    const id=card.id;
+    // Restore saved state (saved=true means collapsed)
+    if(id && saved[id]===true) card.classList.add('collapsed');
+    else if(id && saved[id]===false) card.classList.remove('collapsed');
+    // Wire header click
+    const hdr=card.querySelector(':scope>.card-hdr');
+    if(!hdr)return;
+    hdr.addEventListener('click',function(e){
+      // Don't collapse if clicking a button inside the header (e.g. Export)
+      if(e.target.closest('button')&&e.target.closest('button')!==hdr)return;
+      card.classList.toggle('collapsed');
+      if(id)saveCollapseState(id,card.classList.contains('collapsed'));
     });
   });
 }
 
-// ════════════════════════════════
+// ═══════════════════════════════
 //  MOBILE NAV
-// ════════════════════════════════
+// ═══════════════════════════════
 const PANELS={now:'mp-now',fcast:'mp-fcast',log:'mp-log'};
 function switchSec(sec){
   Object.keys(PANELS).forEach(k=>document.getElementById(PANELS[k]).classList.toggle('off',k!==sec));
   document.querySelectorAll('.nb').forEach(b=>b.classList.toggle('on',b.dataset.sec===sec));
 }
 
-// ════════════════════════════════
+// ═══════════════════════════════
 //  UNIT TOGGLE
-// ════════════════════════════════
+// ═══════════════════════════════
 function toggleUnit(){
   S.useFahrenheit=!S.useFahrenheit;
   localStorage.setItem('atmo_u',S.useFahrenheit?'F':'C');
   const lbl=S.useFahrenheit?'°F':'°C';
-  setTxt('unit-tog',lbl); setTxt('m-unit-tog',lbl);
+  setTxt('unit-tog',lbl);setTxt('m-unit-tog',lbl);
   if(S.weather)renderWeather(S.weather);
-  renderFcastTab();
+  renderForecast();
 }
 
-// ════════════════════════════════
+// ═══════════════════════════════
 //  GEOCODING
-// ════════════════════════════════
+// ═══════════════════════════════
 async function geoZip(z){
   const r=await fetch(`https://api.zippopotam.us/us/${encodeURIComponent(z)}`);
   if(!r.ok)throw new Error('ZIP not found. Try City, State.');
@@ -1295,9 +1222,9 @@ function parseLL(s){
   return(la>=-90&&la<=90&&lo>=-180&&lo<=180)?{lat:la,lng:lo}:null;
 }
 
-// ════════════════════════════════
+// ═══════════════════════════════
 //  LOCATION MODAL
-// ════════════════════════════════
+// ═══════════════════════════════
 function openLocModal(){document.getElementById('loc-modal').classList.add('on');}
 document.getElementById('loc-btn').addEventListener('click',openLocModal);
 document.getElementById('loc-cancel').addEventListener('click',()=>document.getElementById('loc-modal').classList.remove('on'));
@@ -1316,8 +1243,8 @@ document.getElementById('gps-btn').addEventListener('click',()=>{
     err=>{
       st.style.color='var(--bad)';
       if(err.code===1){st.textContent='Permission denied.';pb.classList.add('on');}
-      else if(err.code===2)st.textContent='Position unavailable. Use manual entry.';
-      else st.textContent='Timed out. Use manual entry.';
+      else if(err.code===2)st.textContent='Position unavailable. Try manual entry.';
+      else st.textContent='Timed out. Try manual entry.';
     },
     {timeout:12000,enableHighAccuracy:true}
   );
@@ -1341,9 +1268,9 @@ document.getElementById('loc-save').addEventListener('click',async()=>{
   finally{btn.textContent='Save';btn.disabled=false;}
 });
 
-// ════════════════════════════════
-//  SETTINGS MODAL
-// ════════════════════════════════
+// ═══════════════════════════════
+//  SETTINGS
+// ═══════════════════════════════
 document.getElementById('settings-btn').addEventListener('click',()=>{
   document.getElementById('set-airnow').value=S.keys.airnow;
   document.getElementById('set-pollen').value=S.keys.pollen;
@@ -1356,9 +1283,9 @@ document.getElementById('set-save').addEventListener('click',()=>{
   saveKeys();document.getElementById('set-modal').classList.remove('on');loadAll();
 });
 
-// ════════════════════════════════
+// ═══════════════════════════════
 //  GLOBAL WIRING
-// ════════════════════════════════
+// ═══════════════════════════════
 document.getElementById('logo-home').addEventListener('click',()=>switchSec('now'));
 document.getElementById('refresh-btn').addEventListener('click',()=>{
   const b=document.getElementById('refresh-btn');
@@ -1372,29 +1299,20 @@ document.getElementById('unit-tog').addEventListener('click',toggleUnit);
 document.getElementById('m-unit-tog').addEventListener('click',toggleUnit);
 [['export-btn',exportLogs],['m-export-btn',exportLogs],['ml-export-btn',exportLogs],
  ['edit-cancel',()=>document.getElementById('edit-modal').classList.remove('on')],
- ['edit-save',saveEdit]].forEach(([id,fn])=>{
-  const el=document.getElementById(id); if(el) el.addEventListener('click',fn);
-});
+ ['edit-save',saveEdit]].forEach(([id,fn])=>{const el=document.getElementById(id);if(el)el.addEventListener('click',fn);});
 document.querySelectorAll('.nb').forEach(b=>b.addEventListener('click',()=>switchSec(b.dataset.sec)));
 document.querySelectorAll('.ov').forEach(o=>o.addEventListener('click',e=>{if(e.target===o)o.classList.remove('on');}));
-wireTabGroup('ftabs-d');
-wireTabGroup('ftabs-m');
-// Collapsible cards
-document.querySelectorAll('.collapsible .card-hdr').forEach(function(hdr){
-  hdr.addEventListener('click',function(){
-    hdr.closest('.collapsible').classList.toggle('collapsed');
-  });
-});
 setInterval(()=>{if(S.lat&&S.lng)loadAll();},15*60*1000);
 
-// ════════════════════════════════
+// ═══════════════════════════════
 //  INIT
-// ════════════════════════════════
+// ═══════════════════════════════
 loadStore();
 setTxt('unit-tog',S.useFahrenheit?'°F':'°C');
 setTxt('m-unit-tog',S.useFahrenheit?'°F':'°C');
 if(S.locName)setTxt('loc-lbl',S.locName);
 renderLog();
+initCollapsibles(); // must run after renderLog (log cards exist now)
 if(S.lat&&S.lng){loadAll();}else{showSetup();setTimeout(openLocModal,400);}
 </script>
 </body>
