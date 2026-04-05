@@ -188,7 +188,7 @@ main{flex:1;padding:14px 14px calc(var(--navh) + env(safe-area-inset-bottom) + 8
 .abtn.del:hover{background:rgba(200,42,42,.1)}
 
 /* BOTTOM NAV — 3 tabs */
-.bnav{display:none;position:fixed;bottom:0;left:0;right:0;height:calc(var(--navh) + env(safe-area-inset-bottom));padding-bottom:env(safe-area-inset-bottom);background:var(--sf);border-top:1px solid var(--bdr);z-index:200;justify-content:space-around;align-items:stretch}
+.bnav{position:fixed;bottom:0;left:0;right:0;height:calc(var(--navh) + env(safe-area-inset-bottom));padding-bottom:env(safe-area-inset-bottom);background:var(--sf);border-top:1px solid var(--bdr);z-index:200;justify-content:space-around;align-items:stretch;display:none}
 .nb{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;border:none;background:none;cursor:pointer;color:var(--tx3);font-family:'DM Mono',monospace;font-size:9px;text-transform:uppercase;letter-spacing:.3px;transition:color .15s;position:relative}
 .nb.on{color:var(--ac)}
 .nb svg{width:21px;height:21px}
@@ -231,6 +231,25 @@ main{flex:1;padding:14px 14px calc(var(--navh) + env(safe-area-inset-bottom) + 8
 .stok  {background:rgba(42,156,90,.12);color:var(--good);border:1px solid rgba(42,156,90,.25)}
 .sterr {background:rgba(200,42,42,.12);color:var(--bad); border:1px solid rgba(200,42,42,.25)}
 .stload{background:var(--bg3);color:var(--tx3);border:1px solid var(--bdr)}
+
+
+/* COLLAPSIBLE CARDS (mobile) */
+.collapsible .card-hdr{cursor:pointer;user-select:none;-webkit-user-select:none}
+.collapsible .card-hdr::after{content:'\25BE';font-size:11px;color:var(--tx3);margin-left:6px;display:inline-block;transition:transform .2s}
+.collapsible.collapsed .card-hdr::after{transform:rotate(-90deg)}
+.collapsible .card-body{overflow:hidden;transition:max-height .35s ease,opacity .25s ease;max-height:800px;opacity:1}
+.collapsible.collapsed .card-body{max-height:0;opacity:0}
+
+
+/* COMBINED FORECAST CELLS */
+.frow-daily {grid-template-columns:repeat(7,minmax(72px,1fr))}
+.frow-hourly{grid-template-columns:repeat(24,minmax(58px,1fr))}
+.fd-combined{padding:0;overflow:hidden;display:flex;flex-direction:column}
+.fd-section{padding:6px 4px;text-align:center}
+.fd-wx{border-bottom:1px solid var(--bdr)}
+.fd-poll{border-bottom:1px solid var(--bdr);background:rgba(42,156,90,.04)}
+.fd-aq{background:rgba(42,106,200,.04)}
+.fd-sec-lbl{font-size:9px;color:var(--tx3);margin-bottom:2px}
 
 @keyframes fu{from{opacity:0;transform:translateY(9px)}to{opacity:1;transform:translateY(0)}}
 .card{animation:fu .3s ease both}
@@ -295,12 +314,8 @@ main{flex:1;padding:14px 14px calc(var(--navh) + env(safe-area-inset-bottom) + 8
       <div class="ldr" id="ldr-fcast"><div class="spin"></div><div class="ldr-msg">Loading forecast…</div><div class="ldr-detail" id="err-fcast"></div></div>
       <div class="card-hdr"><span class="ctitle">Forecast</span><span class="badge" id="fcast-src-badge">NWS</span></div>
       <div class="ftabs" id="ftabs-d">
-        <button class="ftab on" data-tab="wx10">10-Day</button>
-        <button class="ftab" data-tab="wxhr">Hourly</button>
-        <button class="ftab" data-tab="poll10">Pollen</button>
-        <button class="ftab" data-tab="pollhr">Pollen/hr</button>
-        <button class="ftab" data-tab="aq10">Air</button>
-        <button class="ftab" data-tab="aqhr">Air/hr</button>
+        <button class="ftab on" data-tab="daily">Daily</button>
+        <button class="ftab" data-tab="hourly">Hourly</button>
       </div>
       <div id="fcast-body"></div>
       <div class="ts" id="fcast-ts"></div>
@@ -338,24 +353,15 @@ main{flex:1;padding:14px 14px calc(var(--navh) + env(safe-area-inset-bottom) + 8
     <div class="card-hdr"><span class="ctitle">Environmental Alerts</span><span class="badge" id="m-alerts-badge">—</span></div>
     <div id="m-alerts-body"><div class="nodata">Waiting for data…</div></div>
   </div>
-  <div class="card">
+  <div class="card collapsible collapsed" id="mob-poll-card">
     <div class="ldr" id="ldr-mpoll"><div class="spin"></div><div class="ldr-msg">Loading pollen…</div></div>
     <div class="card-hdr"><span class="ctitle">Pollen &amp; Allergens</span><span class="badge" id="m-poll-badge">—</span></div>
-    <div id="m-poll-body"></div>
-    <div class="ts" id="m-poll-ts"></div>
+    <div class="card-body"><div id="m-poll-body"></div><div class="ts" id="m-poll-ts"></div></div>
   </div>
-  <div class="card">
+  <div class="card collapsible collapsed" id="mob-aq-card">
     <div class="ldr" id="ldr-maq"><div class="spin"></div><div class="ldr-msg">Loading air quality…</div></div>
     <div class="card-hdr"><span class="ctitle">Air Quality</span><span class="badge" id="m-aq-badge">AirNow</span></div>
-    <div id="m-aq-body"></div>
-    <div class="ts" id="m-aq-ts"></div>
-  </div>
-  <div class="card">
-    <div class="card-hdr">
-      <span class="ctitle">How I Feel</span>
-      <button class="hbtn" id="m-export-btn" style="font-size:10px;padding:4px 9px">&#8595; Export</button>
-    </div>
-    <div id="log-body-m"></div>
+    <div class="card-body"><div id="m-aq-body"></div><div class="ts" id="m-aq-ts"></div></div>
   </div>
 </div>
 
@@ -365,12 +371,8 @@ main{flex:1;padding:14px 14px calc(var(--navh) + env(safe-area-inset-bottom) + 8
     <div class="ldr" id="ldr-mfcast"><div class="spin"></div><div class="ldr-msg">Loading forecast…</div></div>
     <div class="card-hdr"><span class="ctitle">Forecast</span><span class="badge">NWS</span></div>
     <div class="ftabs" id="ftabs-m">
-      <button class="ftab on" data-tab="wx10">10-Day</button>
-      <button class="ftab" data-tab="wxhr">Hourly</button>
-      <button class="ftab" data-tab="poll10">Pollen</button>
-      <button class="ftab" data-tab="pollhr">Pollen/hr</button>
-      <button class="ftab" data-tab="aq10">Air</button>
-      <button class="ftab" data-tab="aqhr">Air/hr</button>
+      <button class="ftab on" data-tab="daily">Daily</button>
+      <button class="ftab" data-tab="hourly">Hourly</button>
     </div>
     <div id="m-fcast-body"></div>
     <div class="ts" id="m-fcast-ts"></div>
@@ -476,7 +478,7 @@ const S={
   aqForecast:null,      // hourly arrays from Open-Meteo AQ {time,pm25,pm10,ozone,no2}
   keys:{airnow:'',pollen:''},
   logs:[],selEmojis:new Set(),editId:null,
-  fcastTab:'wx10',  // active forecast tab
+  fcastTab:'daily',  // active forecast tab
 };
 
 const EMOJIS=[
@@ -837,214 +839,153 @@ function renderAlerts(){
 }
 
 // ════════════════════════════════
-//  RENDER FORECAST TABS
+//  FORECAST — unified Daily + Hourly
 // ════════════════════════════════
+
+// Pollen scale: grains/m3 -> 0-4
+const omPolScale=v=>v<=0?0:v<=10?1:v<=50?2:v<=200?3:4;
+// PM2.5 ug/m3 -> label + colour
+const omAQLabel=pm=>pm<=12?'Good':pm<=35?'Moderate':pm<=55?'USG':pm<=150?'Unhealthy':'V.Unhealthy';
+const omAQCol  =pm=>pm<=12?'var(--good)':pm<=35?'#9a9a20':pm<=55?'var(--warn)':pm<=150?'var(--bad)':'#8f3f97';
+
 function renderFcastTab(){
   const tab=S.fcastTab;
   let html='',ts='';
-  if(tab==='wx10' && S.forecast)       {html=buildWx10();  ts='NWS ✓';}
-  else if(tab==='wxhr' && S.forecastHourly) {html=buildWxHr(); ts='NWS hourly ✓';}
-  else if(tab==='poll10'&& S.pollenForecast){html=buildPoll10();ts='Open-Meteo ✓';}
-  else if(tab==='pollhr'&& S.pollenForecast){html=buildPollHr();ts='Open-Meteo hourly ✓';}
-  else if(tab==='aq10' && S.aqForecast)    {html=buildAQ10(); ts='Open-Meteo ✓';}
-  else if(tab==='aqhr' && S.aqForecast)    {html=buildAQHr(); ts='Open-Meteo hourly ✓';}
-  else html='<div class="nodata">Loading…</div>';
-
+  if(tab==='daily'){html=buildDaily();ts='NWS + Open-Meteo';}
+  else{html=buildHourly();ts='NWS + Open-Meteo hourly';}
   setInner('fcast-body',html); setInner('m-fcast-body',html);
   setTxt('fcast-ts',ts); setTxt('m-fcast-ts',ts);
   ldrHide('fcast');
 }
 
-// 10-day weather (NWS daytime periods)
-function buildWx10(){
+function polMaxForDate(h,date){
+  if(!h)return{grass:0,tree:0,weed:0};
+  const acc={grass:0,tree:0,weed:0};
+  (h.time||[]).forEach((t,i)=>{
+    if(!t.startsWith(date))return;
+    acc.grass=Math.max(acc.grass,h.grass_pollen?.[i]||0);
+    acc.tree =Math.max(acc.tree, h.tree_pollen?.[i] ||0);
+    acc.weed =Math.max(acc.weed, h.weed_pollen?.[i] ||0);
+  });
+  return acc;
+}
+
+function aqMaxForDate(h,date){
+  if(!h)return null;
+  let mx=0;
+  (h.time||[]).forEach((t,i)=>{if(t.startsWith(date))mx=Math.max(mx,h.pm2_5?.[i]||0);});
+  return mx;
+}
+
+function buildDaily(){
+  if(!S.forecast)return'<div class="nodata">Weather data not yet loaded</div>';
   const periods=S.forecast;
   const days=[];
-  for(let i=0;i<periods.length&&days.length<10;i++){
+  for(let i=0;i<periods.length&&days.length<7;i++){
     if(!periods[i].isDaytime)continue;
     days.push({day:periods[i],night:(!periods[i+1]?.isDaytime?periods[i+1]:null)});
   }
-  if(!days.length) for(let i=0;i<Math.min(periods.length,10);i++)days.push({day:periods[i],night:null});
-  let html='',alert=false;
+  if(!days.length)for(let i=0;i<Math.min(periods.length,7);i++)days.push({day:periods[i],night:null});
+  let html='',hasAlert=false;
   days.forEach((pair,i)=>{
     const p=pair.day;
+    const date=p.startTime.slice(0,10);
     const dt=new Date(p.startTime);
     const name=i===0?'Today':dt.toLocaleDateString('en-US',{weekday:'short'});
     const hiF=p.temperature,loF=pair.night?.temperature??null;
-    const hiD=S.useFahrenheit?Math.round(hiF)+'°':Math.round((hiF-32)*5/9)+'°';
-    const loD=loF!=null?(S.useFahrenheit?Math.round(loF)+'°':Math.round((loF-32)*5/9)+'°'):'—';
-    const icon=nwsIcon(p.shortForecast||'',true);
+    const hiD=S.useFahrenheit?Math.round(hiF)+'\xb0':Math.round((hiF-32)*5/9)+'\xb0';
+    const loD=loF!=null?(S.useFahrenheit?Math.round(loF)+'\xb0':Math.round((loF-32)*5/9)+'\xb0'):'--';
+    const wxIcon=nwsIcon(p.shortForecast||'',true);
     const prcp=p.probabilityOfPrecipitation?.value;
-    const prcpD=prcp!=null&&prcp>0?`<div class="fdr">&#128167;${Math.round(prcp)}%</div>`:'';
-    const xa=hiF>100||(loF!=null&&loF<5),xw=hiF>92||(loF!=null&&loF<20)||(prcp!=null&&prcp>70);
-    if(xa)alert=true;
-    html+=`<div class="fd${i===0?' td':''}${xa?' fa':xw?' fw':''}"><div class="fddot"></div><div class="fdn">${name}</div><div class="fdi">${icon}</div><div class="fdh">${hiD}</div><div class="fdl">${loD}</div>${prcpD}</div>`;
+    const prcpD=prcp!=null&&prcp>0?'<div class="fdr">&#128167;'+Math.round(prcp)+'%</div>':'';
+    // pollen
+    const pol=polMaxForDate(S.pollenForecast,date);
+    const gi=omPolScale(pol.grass),ti=omPolScale(pol.tree),wi=omPolScale(pol.weed);
+    const polWorst=Math.max(gi,ti,wi);
+    const polHtml=S.pollenForecast
+      ?('<div class="fd-section fd-poll">'
+        +'<div class="fd-sec-lbl">&#127807; Pollen</div>'
+        +'<div class="fdpi"><span style="background:'+polCol(gi)+'"></span>Grass</div>'
+        +'<div class="fdpi"><span style="background:'+polCol(ti)+'"></span>Tree</div>'
+        +'<div class="fdpi"><span style="background:'+polCol(wi)+'"></span>Weed</div>'
+        +'</div>')
+      :'';
+    // AQ
+    const pm25=aqMaxForDate(S.aqForecast,date);
+    const aqHtml=pm25!=null
+      ?('<div class="fd-section fd-aq">'
+        +'<div class="fd-sec-lbl">&#128168; Air</div>'
+        +'<div class="fdpi" style="color:'+omAQCol(pm25)+'">'+omAQLabel(pm25)+'</div>'
+        +'<div class="fdpi">PM2.5 '+Math.round(pm25)+'</div>'
+        +'</div>')
+      :'';
+    const xa=hiF>100||(loF!=null&&loF<5),xw=hiF>92||polWorst>=4||(prcp!=null&&prcp>70);
+    if(xa)hasAlert=true;
+    html+='<div class="fd fd-combined'+(i===0?' td':'')+(xa?' fa':xw?' fw':'')+'"><div class="fddot"></div>'
+      +'<div class="fd-section fd-wx"><div class="fdn">'+name+'</div><div class="fdi">'+wxIcon+'</div><div class="fdh">'+hiD+'</div><div class="fdl">'+loD+'</div>'+prcpD+'</div>'
+      +polHtml+aqHtml+'</div>';
   });
-  document.getElementById('nd-fcast')?.classList.toggle('on',alert);
-  return`<div class="frow">${html}</div>`;
+  document.getElementById('nd-fcast')?.classList.toggle('on',hasAlert);
+  return'<div class="frow frow-daily">'+html+'</div>';
 }
 
-// Hourly weather (NWS next 24h)
-function buildWxHr(){
-  const periods=S.forecastHourly||[];
-  let html='';
-  periods.slice(0,24).forEach((p,i)=>{
+function buildHourly(){
+  if(!S.forecastHourly)return'<div class="nodata">Hourly weather not yet loaded</div>';
+  let html='',count=0;
+  S.forecastHourly.forEach((p,i)=>{
+    if(count>=24)return;
     const dt=new Date(p.startTime);
-    const label=dt.toLocaleTimeString('en-US',{hour:'numeric',hour12:true}).replace(' ','');
+    const label=dt.toLocaleTimeString('en-US',{hour:'numeric',hour12:true}).replace(/\s+/g,'');
     const tF=p.temperature;
-    const tD=S.useFahrenheit?tF+'°':Math.round((tF-32)*5/9)+'°';
-    const icon=nwsIcon(p.shortForecast||'',p.isDaytime);
+    const tD=S.useFahrenheit?tF+'\xb0':Math.round((tF-32)*5/9)+'\xb0';
+    const wxIcon=nwsIcon(p.shortForecast||'',p.isDaytime);
     const prcp=p.probabilityOfPrecipitation?.value;
-    const prcpD=prcp!=null&&prcp>0?`<div class="fdr">&#128167;${prcp}%</div>`:'';
-    html+=`<div class="fd${i===0?' td':''}"><div class="fdn">${label}</div><div class="fdi">${icon}</div><div class="fdh">${tD}</div>${prcpD}</div>`;
-  });
-  return`<div class="frow hourly">${html}</div>`;
-}
-
-// Pollen scale helper: grains/m³ → 0-4 index
-const omPolScale=v=>v<=0?0:v<=10?1:v<=50?2:v<=200?3:4;
-
-// Build daily pollen rows from hourly data (take max per day)
-function pollenDailyFromHourly(h){
-  const days={};
-  (h.time||[]).forEach((t,i)=>{
-    const day=t.slice(0,10);
-    if(!days[day])days[day]={grass:0,tree:0,weed:0};
-    days[day].grass=Math.max(days[day].grass,h.grass_pollen?.[i]??0);
-    days[day].tree =Math.max(days[day].tree, h.tree_pollen?.[i]??0);
-    days[day].weed =Math.max(days[day].weed, h.weed_pollen?.[i]??0);
-  });
-  return Object.entries(days).slice(0,5);
-}
-
-// 5-day pollen (daily max)
-function buildPoll10(){
-  const h=S.pollenForecast;
-  if(!h)return'<div class="nodata">No pollen forecast data</div>';
-  const days=pollenDailyFromHourly(h);
-  let html='';
-  days.forEach(([date,d],i)=>{
-    const dt=new Date(date+'T12:00:00');
-    const name=i===0?'Today':dt.toLocaleDateString('en-US',{weekday:'short'});
-    const gi=omPolScale(d.grass),ti=omPolScale(d.tree),wi=omPolScale(d.weed);
-    const worst=Math.max(gi,ti,wi);
-    const cls=worst>=4?' fa':worst>=2?' fw':'';
-    html+=`<div class="fd${i===0?' td':''}${cls}">
-      <div class="fddot"></div>
-      <div class="fdn">${name}</div>
-      <div class="fdp">
-        <div class="fdpi"><span style="background:${polCol(gi)}"></span>Grass ${polCatName(gi).slice(0,3)}</div>
-        <div class="fdpi"><span style="background:${polCol(ti)}"></span>Tree ${polCatName(ti).slice(0,3)}</div>
-        <div class="fdpi"><span style="background:${polCol(wi)}"></span>Weed ${polCatName(wi).slice(0,3)}</div>
-      </div>
-    </div>`;
-  });
-  return`<div class="frow" style="grid-template-columns:repeat(5,minmax(80px,1fr))">${html}</div>`;
-}
-
-// Hourly pollen (next 24h)
-function buildPollHr(){
-  const h=S.pollenForecast;
-  if(!h)return'<div class="nodata">No pollen forecast data</div>';
-  const now=new Date();
-  let html='',count=0;
-  (h.time||[]).forEach((t,i)=>{
-    if(count>=24)return;
-    if(new Date(t)<now)return;
-    const dt=new Date(t);
-    const label=dt.toLocaleTimeString('en-US',{hour:'numeric',hour12:true}).replace(' ','');
-    const gi=omPolScale(h.grass_pollen?.[i]??0),ti=omPolScale(h.tree_pollen?.[i]??0),wi=omPolScale(h.weed_pollen?.[i]??0);
-    const worst=Math.max(gi,ti,wi);
-    html+=`<div class="fd${worst>=4?' fa':worst>=2?' fw':''}">
-      <div class="fdn">${label}</div>
-      <div class="fdp">
-        <div class="fdpi"><span style="background:${polCol(gi)}"></span>G</div>
-        <div class="fdpi"><span style="background:${polCol(ti)}"></span>T</div>
-        <div class="fdpi"><span style="background:${polCol(wi)}"></span>W</div>
-      </div>
-    </div>`;
+    const prcpD=prcp!=null&&prcp>0?'<div class="fdr">&#128167;'+prcp+'%</div>':'';
+    // Match pollen + AQ by ISO date+hour prefix "YYYY-MM-DDTHH"
+    const dtKey=p.startTime.slice(0,13);
+    let gi=0,ti=0,wi=0,polOk=false;
+    if(S.pollenForecast){
+      const pi=(S.pollenForecast.time||[]).findIndex(t=>t.slice(0,13)===dtKey);
+      if(pi>=0){gi=omPolScale(S.pollenForecast.grass_pollen?.[pi]||0);ti=omPolScale(S.pollenForecast.tree_pollen?.[pi]||0);wi=omPolScale(S.pollenForecast.weed_pollen?.[pi]||0);polOk=true;}
+    }
+    const polHtml=polOk
+      ?('<div class="fd-section fd-poll">'
+        +'<div class="fd-sec-lbl">&#127807;</div>'
+        +'<div class="fdpi"><span style="background:'+polCol(gi)+'"></span>G</div>'
+        +'<div class="fdpi"><span style="background:'+polCol(ti)+'"></span>T</div>'
+        +'<div class="fdpi"><span style="background:'+polCol(wi)+'"></span>W</div>'
+        +'</div>')
+      :'';
+    let pm25=null,aqOk=false;
+    if(S.aqForecast){
+      const ai=(S.aqForecast.time||[]).findIndex(t=>t.slice(0,13)===dtKey);
+      if(ai>=0){pm25=S.aqForecast.pm2_5?.[ai]||0;aqOk=true;}
+    }
+    const aqHtml=aqOk
+      ?('<div class="fd-section fd-aq">'
+        +'<div class="fd-sec-lbl">&#128168;</div>'
+        +'<div class="fdpi" style="color:'+omAQCol(pm25)+'">'+Math.round(pm25)+'</div>'
+        +'</div>')
+      :'';
+    const xw=Math.max(gi,ti,wi)>=4||(pm25!=null&&pm25>55);
+    html+='<div class="fd fd-combined'+(i===0?' td':'')+(xw?' fw':'')+'"><div class="fd-section fd-wx"><div class="fdn">'+label+'</div><div class="fdi">'+wxIcon+'</div><div class="fdh">'+tD+'</div>'+prcpD+'</div>'+polHtml+aqHtml+'</div>';
     count++;
   });
-  return`<div class="frow hourly">${html||'<div class="nodata">No upcoming data</div>'}</div>`;
+  return'<div class="frow frow-hourly">'+(html||'<div class="nodata">No data</div>')+'</div>';
 }
 
-// Build daily AQ from hourly (max per day)
-function aqDailyFromHourly(h){
-  const days={};
-  (h.time||[]).forEach((t,i)=>{
-    const day=t.slice(0,10);
-    if(!days[day])days[day]={pm25:0,pm10:0,ozone:0,no2:0};
-    days[day].pm25 =Math.max(days[day].pm25, h.pm2_5?.[i]??0);
-    days[day].pm10 =Math.max(days[day].pm10, h.pm10?.[i]??0);
-    days[day].ozone=Math.max(days[day].ozone,h.ozone?.[i]??0);
-    days[day].no2  =Math.max(days[day].no2,  h.nitrogen_dioxide?.[i]??0);
+function buildGooglePollenForecast(dailyInfo){
+  const time=[],grass=[],tree=[],weed=[];
+  dailyInfo.forEach(day=>{
+    const date=day.date.year+'-'+String(day.date.month).padStart(2,'0')+'-'+String(day.date.day).padStart(2,'0');
+    time.push(date+'T12:00');
+    const types=day.pollenTypeInfo||[];
+    const get=name=>{const t=types.find(x=>(x.displayName||x.code||'').toLowerCase().includes(name));return(t?.indexInfo?.value??0)*50;};
+    grass.push(get('grass'));tree.push(get('tree'));weed.push(get('weed'));
   });
-  return Object.entries(days).slice(0,3);
+  return{time,grass_pollen:grass,tree_pollen:tree,weed_pollen:weed};
 }
 
-// μg/m³ → rough AQI colour (simplified breakpoints)
-function omAQCol(pm25){
-  if(pm25<=12)return'var(--good)';
-  if(pm25<=35)return'#9a9a20';
-  if(pm25<=55)return'var(--warn)';
-  if(pm25<=150)return'var(--bad)';
-  return'#8f3f97';
-}
-function omAQLabel(pm25){
-  if(pm25<=12)return'Good';
-  if(pm25<=35)return'Mod';
-  if(pm25<=55)return'USG';
-  if(pm25<=150)return'Unhealthy';
-  return'V.Unhealthy';
-}
-
-// 3-day AQ (daily max PM2.5)
-function buildAQ10(){
-  const h=S.aqForecast;
-  if(!h)return'<div class="nodata">No air quality forecast</div>';
-  const days=aqDailyFromHourly(h);
-  let html='';
-  days.forEach(([date,d],i)=>{
-    const dt=new Date(date+'T12:00:00');
-    const name=i===0?'Today':dt.toLocaleDateString('en-US',{weekday:'short'});
-    const col=omAQCol(d.pm25);
-    const lbl=omAQLabel(d.pm25);
-    const bad=d.pm25>55;
-    html+=`<div class="fd${i===0?' td':''}${bad?' fa':''}">
-      <div class="fddot"></div>
-      <div class="fdn">${name}</div>
-      <div class="fdi" style="font-size:13px;color:${col}">${lbl}</div>
-      <div class="fdp">
-        <div class="fdpi">PM2.5 ${Math.round(d.pm25)}</div>
-        <div class="fdpi">PM10 ${Math.round(d.pm10)}</div>
-        <div class="fdpi">O&#8323; ${Math.round(d.ozone)}</div>
-      </div>
-    </div>`;
-  });
-  return`<div class="frow" style="grid-template-columns:repeat(3,minmax(90px,1fr))">${html}</div>`;
-}
-
-// Hourly AQ (next 24h)
-function buildAQHr(){
-  const h=S.aqForecast;
-  if(!h)return'<div class="nodata">No air quality forecast</div>';
-  const now=new Date();
-  let html='',count=0;
-  (h.time||[]).forEach((t,i)=>{
-    if(count>=24)return;
-    if(new Date(t)<now)return;
-    const dt=new Date(t);
-    const label=dt.toLocaleTimeString('en-US',{hour:'numeric',hour12:true}).replace(' ','');
-    const pm25=h.pm2_5?.[i]??0;
-    const col=omAQCol(pm25);
-    html+=`<div class="fd">
-      <div class="fdn">${label}</div>
-      <div class="fdi" style="font-size:11px;color:${col}">${Math.round(pm25)}</div>
-      <div class="fdp"><div class="fdpi" style="color:${col}">${omAQLabel(pm25)}</div></div>
-    </div>`;
-    count++;
-  });
-  return`<div class="frow hourly">${html||'<div class="nodata">No data</div>'}</div>`;
-}
 
 // ════════════════════════════════
 //  RENDER AQ (current card)
@@ -1432,6 +1373,12 @@ document.querySelectorAll('.nb').forEach(b=>b.addEventListener('click',()=>switc
 document.querySelectorAll('.ov').forEach(o=>o.addEventListener('click',e=>{if(e.target===o)o.classList.remove('on');}));
 wireTabGroup('ftabs-d');
 wireTabGroup('ftabs-m');
+// Collapsible cards
+document.querySelectorAll('.collapsible .card-hdr').forEach(function(hdr){
+  hdr.addEventListener('click',function(){
+    hdr.closest('.collapsible').classList.toggle('collapsed');
+  });
+});
 setInterval(()=>{if(S.lat&&S.lng)loadAll();},15*60*1000);
 
 // ════════════════════════════════
