@@ -40,12 +40,21 @@ header{display:flex;align-items:center;justify-content:space-between;padding:0 1
 /* MAIN */
 main{flex:1;padding:14px 14px calc(var(--navh) + env(safe-area-inset-bottom) + 8px)}
 
-/* DESKTOP GRID */
-.dgrid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.7fr) minmax(0,1.1fr);grid-template-rows:auto auto;gap:13px;max-width:1380px;margin:0 auto}
-.gc{grid-column:1;grid-row:1}.gf{grid-column:2/4;grid-row:1}.gp{grid-column:1;grid-row:2}.ga{grid-column:2;grid-row:2}.gl{grid-column:3;grid-row:2}
-@media(max-width:900px){
-  .dgrid{grid-template-columns:1fr 1fr;grid-template-areas:"c c" "f f" "p a" "l l"}
-  .gc{grid-area:c}.gf{grid-area:f}.gp{grid-area:p}.ga{grid-area:a}.gl{grid-area:l}
+/* DESKTOP GRID — Now / Forecast / Log columns */
+.dgrid{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1.8fr) minmax(0,1fr);gap:13px;max-width:1440px;margin:0 auto;align-items:start}
+/* Now column: current + alerts + pollen + AQ stacked */
+.gcol-now{display:flex;flex-direction:column;gap:13px}
+/* Forecast column */
+.gcol-fcast{display:flex;flex-direction:column;gap:13px}
+/* Log column */
+.gcol-log{display:flex;flex-direction:column;gap:13px}
+@media(max-width:1100px){
+  .dgrid{grid-template-columns:1fr 1fr}
+  .gcol-log{grid-column:1/-1}
+}
+@media(max-width:700px){
+  .dgrid{display:none}
+  .bnav{display:flex}
 }
 
 /* CARD */
@@ -65,12 +74,14 @@ main{flex:1;padding:14px 14px calc(var(--navh) + env(safe-area-inset-bottom) + 8
 .ldr-msg{font-size:11px;color:var(--tx3);text-align:center;padding:0 18px;line-height:1.6;max-width:260px}
 .ldr-detail{font-size:10px;color:var(--bad);text-align:center;padding:0 18px;line-height:1.5;max-width:260px;margin-top:-4px;display:none}
 .nodata{font-size:12px;color:var(--tx3);text-align:center;padding:14px 0}
+.ts{font-size:9px;color:var(--tx3);margin-top:9px}
 
 /* ALERT BAR */
 .abar{display:none;margin-bottom:11px;padding:7px 11px;background:rgba(200,42,42,.1);border:1px solid rgba(200,42,42,.3);border-radius:7px;font-size:11px;color:var(--bad);line-height:1.4}
 .abar.on{display:block}
 
-/* CURRENT */
+/* CURRENT WEATHER */
+.cur-layout{display:grid;grid-template-columns:1fr 1fr;gap:13px;align-items:start}
 .bigT{font-family:'Fraunces',serif;font-size:66px;font-weight:200;line-height:1;letter-spacing:-3px;margin-bottom:4px}
 .bigT sup{font-size:25px;letter-spacing:0;vertical-align:super}
 .cdesc{font-size:13px;color:var(--tx2);margin-bottom:13px;text-transform:capitalize}
@@ -81,10 +92,38 @@ main{flex:1;padding:14px 14px calc(var(--navh) + env(safe-area-inset-bottom) + 8
 .sval.hi{color:var(--bad)}.sval.wn{color:var(--warn)}.sval.lo{color:var(--ac2)}
 .uvbar{width:100%;height:5px;border-radius:3px;margin-top:4px;background:var(--bg3);overflow:hidden}
 .uvfill{height:100%;border-radius:3px;transition:width .8s}
-.ts{font-size:9px;color:var(--tx3);margin-top:9px}
 
-/* FORECAST */
-.frow{display:grid;grid-template-columns:repeat(10,minmax(58px,1fr));gap:5px;overflow-x:auto;padding-bottom:3px}
+/* ALERTS STRIP — elevated env factors */
+.alerts-strip{display:flex;flex-direction:column;gap:6px}
+.alert-item{
+  display:flex;align-items:center;gap:9px;padding:8px 11px;
+  border-radius:8px;font-size:11px;border:1px solid var(--bdr);background:var(--bg2);
+}
+.alert-item.lvl-mod {border-color:rgba(232,160,32,.4);background:rgba(232,160,32,.07)}
+.alert-item.lvl-hi  {border-color:rgba(200,90,42,.4); background:rgba(200,90,42,.07)}
+.alert-item.lvl-vhi {border-color:rgba(200,42,42,.4); background:rgba(200,42,42,.07)}
+.alert-icon{font-size:16px;flex-shrink:0}
+.alert-info{flex:1}
+.alert-name{font-weight:500;color:var(--tx)}
+.alert-cat{font-size:10px;color:var(--tx3);margin-top:1px}
+.alert-badge{font-size:10px;padding:2px 7px;border-radius:20px;flex-shrink:0}
+.alert-item.lvl-mod .alert-badge{background:rgba(232,160,32,.15);color:var(--warn);border:1px solid rgba(232,160,32,.3)}
+.alert-item.lvl-hi  .alert-badge{background:rgba(200,90,42,.12);color:var(--ac);  border:1px solid rgba(200,90,42,.3)}
+.alert-item.lvl-vhi .alert-badge{background:rgba(200,42,42,.12); color:var(--bad); border:1px solid rgba(200,42,42,.3)}
+.alerts-empty{font-size:11px;color:var(--good);padding:4px 2px}
+
+/* FORECAST TABS */
+.ftabs{display:flex;gap:2px;margin-bottom:13px;background:var(--bg2);border-radius:8px;padding:3px}
+.ftab{
+  flex:1;padding:5px 4px;border:none;background:none;border-radius:6px;
+  font-family:'DM Mono',monospace;font-size:10px;color:var(--tx3);cursor:pointer;
+  transition:all .15s;white-space:nowrap;text-align:center;
+}
+.ftab.on{background:var(--sf);color:var(--tx);box-shadow:0 1px 4px rgba(0,0,0,.1)}
+
+/* FORECAST SCROLL ROW */
+.frow{display:grid;grid-template-columns:repeat(10,minmax(60px,1fr));gap:5px;overflow-x:auto;padding-bottom:4px}
+.frow.hourly{grid-template-columns:repeat(24,minmax(52px,1fr))}
 .frow::-webkit-scrollbar{height:3px}
 .frow::-webkit-scrollbar-thumb{background:var(--bdr);border-radius:2px}
 .fd{background:var(--bg2);border:1px solid var(--bdr);border-radius:9px;padding:8px 4px;text-align:center;position:relative}
@@ -92,9 +131,13 @@ main{flex:1;padding:14px 14px calc(var(--navh) + env(safe-area-inset-bottom) + 8
 .fd.fa{border-color:var(--bad)}.fd.fw{border-color:var(--warn)}
 .fddot{position:absolute;top:5px;right:5px;width:5px;height:5px;border-radius:50%;display:none}
 .fa .fddot{display:block;background:var(--bad)}.fw .fddot{display:block;background:var(--warn)}
-.fdn{font-size:9px;color:var(--tx3);text-transform:uppercase;letter-spacing:.7px;margin-bottom:4px}
+.fdn{font-size:9px;color:var(--tx3);text-transform:uppercase;letter-spacing:.6px;margin-bottom:4px}
 .fdi{font-size:19px;margin-bottom:4px}.fdh{font-size:13px}.fdl{font-size:10px;color:var(--tx3)}
 .fdr{font-size:9px;color:var(--ac2);margin-top:3px}
+/* Pollen/AQ forecast cell extras */
+.fdp{display:flex;flex-direction:column;gap:2px;margin-top:3px}
+.fdpi{font-size:9px;color:var(--tx3)}
+.fdpi span{display:inline-block;width:6px;height:6px;border-radius:50%;margin-right:3px;vertical-align:middle}
 
 /* POLLEN */
 .prow{display:flex;align-items:center;gap:7px;margin-bottom:7px}
@@ -116,12 +159,7 @@ main{flex:1;padding:14px 14px calc(var(--navh) + env(safe-area-inset-bottom) + 8
 
 /* LOG */
 .erow{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px}
-.ebtn{
-  width:48px;display:flex;flex-direction:column;align-items:center;
-  padding:6px 2px 5px;gap:3px;
-  border-radius:8px;border:2px solid var(--bdr);background:var(--bg2);
-  cursor:pointer;transition:all .15s;
-}
+.ebtn{width:48px;display:flex;flex-direction:column;align-items:center;padding:6px 2px 5px;gap:3px;border-radius:8px;border:2px solid var(--bdr);background:var(--bg2);cursor:pointer;transition:all .15s}
 .ebtn:hover{background:var(--bg3);transform:scale(1.04)}
 .ebtn.sel{border-color:var(--ac);background:rgba(200,90,42,.1)}
 .ebtn .ei{font-size:20px;line-height:1}
@@ -133,10 +171,9 @@ main{flex:1;padding:14px 14px calc(var(--navh) + env(safe-area-inset-bottom) + 8
 .lbtn:hover{opacity:.87}
 .lok{display:none;width:100%;padding:10px;background:var(--good);border:none;border-radius:7px;color:#fff;font-family:'DM Mono',monospace;font-size:12px;text-align:center}
 .lhdr{font-size:10px;text-transform:uppercase;letter-spacing:1.5px;color:var(--tx3);margin:13px 0 7px}
-.llist{display:flex;flex-direction:column;gap:6px;max-height:280px;overflow-y:auto}
+.llist{display:flex;flex-direction:column;gap:6px;max-height:320px;overflow-y:auto}
 .llist::-webkit-scrollbar{width:3px}
 .llist::-webkit-scrollbar-thumb{background:var(--bdr);border-radius:2px}
-/* Log entry — actions always visible on expand */
 .le{background:var(--bg2);border:1px solid var(--bdr);border-radius:7px;padding:8px;font-size:11px}
 .letop{display:flex;align-items:baseline;gap:7px;margin-bottom:4px;flex-wrap:wrap}
 .leems{font-size:14px;letter-spacing:2px;flex-shrink:0}
@@ -144,20 +181,28 @@ main{flex:1;padding:14px 14px calc(var(--navh) + env(safe-area-inset-bottom) + 8
 .lets{font-size:9px;color:var(--tx3);margin-left:auto;white-space:nowrap;flex-shrink:0}
 .lechips{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:6px}
 .lechip{font-size:9px;padding:2px 5px;background:var(--bg);border:1px solid var(--bdr);border-radius:3px;color:var(--tx3)}
-/* Actions always visible — no expand needed */
 .leact{display:flex;gap:5px}
 .abtn{padding:4px 10px;border-radius:5px;font-size:11px;cursor:pointer;font-family:'DM Mono',monospace;border:1px solid var(--bdr);background:var(--sf);color:var(--tx2)}
 .abtn.del{border-color:rgba(200,42,42,.3);color:var(--bad)}
 .abtn:hover{background:var(--bg3)}
 .abtn.del:hover{background:rgba(200,42,42,.1)}
 
-/* BOTTOM NAV */
+/* BOTTOM NAV — 3 tabs */
 .bnav{display:none;position:fixed;bottom:0;left:0;right:0;height:calc(var(--navh) + env(safe-area-inset-bottom));padding-bottom:env(safe-area-inset-bottom);background:var(--sf);border-top:1px solid var(--bdr);z-index:200;justify-content:space-around;align-items:stretch}
 .nb{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;border:none;background:none;cursor:pointer;color:var(--tx3);font-family:'DM Mono',monospace;font-size:9px;text-transform:uppercase;letter-spacing:.3px;transition:color .15s;position:relative}
 .nb.on{color:var(--ac)}
 .nb svg{width:21px;height:21px}
 .nbdot{position:absolute;top:6px;right:calc(50% - 14px);width:6px;height:6px;border-radius:50%;background:var(--bad);display:none}
 .nbdot.on{display:block}
+
+/* MOBILE PANELS */
+.mpanel{display:none}
+@media(max-width:700px){
+  main{padding:12px 12px calc(var(--navh) + env(safe-area-inset-bottom) + 4px)}
+  .mpanel{display:block}
+  .mpanel.off{display:none}
+  .mpanel .card+.card{margin-top:13px}
+}
 
 /* MODAL */
 .ov{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:500;align-items:center;justify-content:center;padding:18px}
@@ -179,44 +224,17 @@ main{flex:1;padding:14px 14px calc(var(--navh) + env(safe-area-inset-bottom) + 8
 .permbox{background:rgba(200,90,42,.08);border:1px solid rgba(200,90,42,.2);border-radius:8px;padding:10px 12px;font-size:11px;color:var(--tx2);line-height:1.5;margin-bottom:9px;display:none}
 .permbox.on{display:block}
 .mdiv{font-size:11px;color:var(--tx3);text-align:center;margin:7px 0}
-
-/* MOBILE: hide desktop grid, show panels */
-@media(max-width:600px){
-  main{padding:12px 12px calc(var(--navh) + env(safe-area-inset-bottom) + 4px)}
-  .dgrid{display:none}
-  .bnav{display:flex}
-}
-/* Mobile panels always in DOM; toggled via .off */
-.mpanel{display:none}
-@media(max-width:600px){
-  .mpanel{display:block}
-  .mpanel.off{display:none}
-}
-
-/* DIAGNOSTIC BAR */
-.diagbar{background:var(--bg2);border:1px solid var(--bdr);border-radius:var(--r);padding:12px 14px;margin-bottom:13px;font-size:11px;line-height:1.8;display:none}
-.diagbar.on{display:block}
-.drow{display:flex;align-items:baseline;gap:8px}
-.dlbl{color:var(--tx3);width:80px;flex-shrink:0}
-.dval{color:var(--tx2)}
-.dval.ok{color:var(--good)}.dval.err{color:var(--bad)}.dval.loading{color:var(--warn)}
-
-
-/* SETTINGS SOURCE BLOCKS */
 .stsource{background:var(--bg2);border:1px solid var(--bdr);border-radius:9px;padding:12px 13px;margin-bottom:10px}
 .stsource-hdr{display:flex;align-items:center;justify-content:space-between;gap:8px}
 .stsource-name{font-size:11px;font-weight:500;color:var(--tx2)}
 .stbadge{font-size:10px;padding:2px 8px;border-radius:20px;white-space:nowrap;flex-shrink:0}
 .stok  {background:rgba(42,156,90,.12);color:var(--good);border:1px solid rgba(42,156,90,.25)}
 .sterr {background:rgba(200,42,42,.12);color:var(--bad); border:1px solid rgba(200,42,42,.25)}
-.stload{background:var(--bg3);         color:var(--tx3); border:1px solid var(--bdr)}
-
-/* Remove old diagbar styles (kept for safety, now hidden) */
-.diagbar{display:none}
+.stload{background:var(--bg3);color:var(--tx3);border:1px solid var(--bdr)}
 
 @keyframes fu{from{opacity:0;transform:translateY(9px)}to{opacity:1;transform:translateY(0)}}
 .card{animation:fu .3s ease both}
-.mpanel .card{animation:fu .25s ease both}
+.mpanel .card{animation:fu .25s ease both;animation-delay:0s!important}
 </style>
 </head>
 <body>
@@ -231,9 +249,13 @@ main{flex:1;padding:14px 14px calc(var(--navh) + env(safe-area-inset-bottom) + 8
 </header>
 
 <main>
-  <!-- DESKTOP GRID -->
-  <div class="dgrid">
-    <div class="card gc">
+<!-- ═══════════════ DESKTOP GRID ═══════════════ -->
+<div class="dgrid">
+
+  <!-- NOW COLUMN: current + alerts + pollen + AQ -->
+  <div class="gcol-now">
+    <!-- Current Weather -->
+    <div class="card">
       <div class="ldr" id="ldr-cur"><div class="spin"></div><div class="ldr-msg">Loading weather…</div><div class="ldr-detail" id="err-cur"></div></div>
       <div class="card-hdr">
         <span class="ctitle">Current</span>
@@ -245,25 +267,49 @@ main{flex:1;padding:14px 14px calc(var(--navh) + env(safe-area-inset-bottom) + 8
       <div id="cur-body"></div>
       <div class="ts" id="cur-ts"></div>
     </div>
-    <div class="card gf">
-      <div class="ldr" id="ldr-fcast"><div class="spin"></div><div class="ldr-msg">Loading forecast…</div><div class="ldr-detail" id="err-fcast"></div></div>
-      <div class="card-hdr"><span class="ctitle">10-Day Forecast</span><span class="badge">Open-Meteo</span></div>
-      <div id="fcast-body"></div>
-      <div class="ts" id="fcast-ts"></div>
+    <!-- Elevated Allergens & Air Quality -->
+    <div class="card">
+      <div class="ldr off" id="ldr-alerts"><div class="spin"></div><div class="ldr-msg">Loading…</div></div>
+      <div class="card-hdr"><span class="ctitle">Environmental Alerts</span><span class="badge" id="alerts-badge">—</span></div>
+      <div id="alerts-body"><div class="nodata">Waiting for data…</div></div>
     </div>
-    <div class="card gp">
+    <!-- Pollen Detail -->
+    <div class="card">
       <div class="ldr" id="ldr-poll"><div class="spin"></div><div class="ldr-msg">Loading pollen…</div><div class="ldr-detail" id="err-poll"></div></div>
       <div class="card-hdr"><span class="ctitle">Pollen &amp; Allergens</span><span class="badge" id="poll-badge">—</span></div>
       <div id="poll-body"></div>
       <div class="ts" id="poll-ts"></div>
     </div>
-    <div class="card ga">
+    <!-- AQ Detail -->
+    <div class="card">
       <div class="ldr" id="ldr-aq"><div class="spin"></div><div class="ldr-msg">Loading air quality…</div><div class="ldr-detail" id="err-aq"></div></div>
       <div class="card-hdr"><span class="ctitle">Air Quality</span><span class="badge" id="aq-badge">AirNow</span></div>
       <div id="aq-body"></div>
       <div class="ts" id="aq-ts"></div>
     </div>
-    <div class="card gl">
+  </div>
+
+  <!-- FORECAST COLUMN -->
+  <div class="gcol-fcast">
+    <div class="card">
+      <div class="ldr" id="ldr-fcast"><div class="spin"></div><div class="ldr-msg">Loading forecast…</div><div class="ldr-detail" id="err-fcast"></div></div>
+      <div class="card-hdr"><span class="ctitle">Forecast</span><span class="badge" id="fcast-src-badge">NWS</span></div>
+      <div class="ftabs" id="ftabs-d">
+        <button class="ftab on" data-tab="wx10">10-Day</button>
+        <button class="ftab" data-tab="wxhr">Hourly</button>
+        <button class="ftab" data-tab="poll10">Pollen</button>
+        <button class="ftab" data-tab="pollhr">Pollen/hr</button>
+        <button class="ftab" data-tab="aq10">Air</button>
+        <button class="ftab" data-tab="aqhr">Air/hr</button>
+      </div>
+      <div id="fcast-body"></div>
+      <div class="ts" id="fcast-ts"></div>
+    </div>
+  </div>
+
+  <!-- LOG COLUMN -->
+  <div class="gcol-log">
+    <div class="card">
       <div class="card-hdr">
         <span class="ctitle">How I Feel</span>
         <button class="hbtn" id="export-btn" style="font-size:10px;padding:4px 9px">&#8595; Export</button>
@@ -271,61 +317,82 @@ main{flex:1;padding:14px 14px calc(var(--navh) + env(safe-area-inset-bottom) + 8
       <div id="log-body-d"></div>
     </div>
   </div>
+</div>
 
-  <!-- MOBILE PANELS -->
-  <div class="mpanel" id="mp-cur">
-    <div class="card">
-      <div class="ldr" id="ldr-mcur"><div class="spin"></div><div class="ldr-msg">Loading weather…</div><div class="ldr-detail" id="err-mcur"></div></div>
-      <div class="card-hdr">
-        <span class="ctitle">Current</span>
-        <div style="display:flex;gap:6px;align-items:center">
-          <span id="m-unit-tog" style="font-size:10px;color:var(--tx3);cursor:pointer;padding:3px 7px;border:1px solid var(--bdr);border-radius:5px;background:var(--bg2)">°F</span>
-          <span class="badge" id="m-cur-badge">—</span>
-        </div>
+<!-- ═══════════════ MOBILE PANELS ═══════════════ -->
+<!-- NOW: current + alerts + pollen + AQ + log -->
+<div class="mpanel" id="mp-now">
+  <div class="card">
+    <div class="ldr" id="ldr-mcur"><div class="spin"></div><div class="ldr-msg">Loading weather…</div><div class="ldr-detail" id="err-mcur"></div></div>
+    <div class="card-hdr">
+      <span class="ctitle">Current</span>
+      <div style="display:flex;gap:6px;align-items:center">
+        <span id="m-unit-tog" style="font-size:10px;color:var(--tx3);cursor:pointer;padding:3px 7px;border:1px solid var(--bdr);border-radius:5px;background:var(--bg2)">°F</span>
+        <span class="badge" id="m-cur-badge">—</span>
       </div>
-      <div id="m-cur-body"></div>
-      <div class="ts" id="m-cur-ts"></div>
     </div>
+    <div id="m-cur-body"></div>
+    <div class="ts" id="m-cur-ts"></div>
   </div>
-  <div class="mpanel off" id="mp-fcast">
-    <div class="card">
-      <div class="ldr" id="ldr-mfcast"><div class="spin"></div><div class="ldr-msg">Loading forecast…</div></div>
-      <div class="card-hdr"><span class="ctitle">10-Day Forecast</span><span class="badge">Open-Meteo</span></div>
-      <div id="m-fcast-body"></div>
-      <div class="ts" id="m-fcast-ts"></div>
+  <div class="card">
+    <div class="card-hdr"><span class="ctitle">Environmental Alerts</span><span class="badge" id="m-alerts-badge">—</span></div>
+    <div id="m-alerts-body"><div class="nodata">Waiting for data…</div></div>
+  </div>
+  <div class="card">
+    <div class="ldr" id="ldr-mpoll"><div class="spin"></div><div class="ldr-msg">Loading pollen…</div></div>
+    <div class="card-hdr"><span class="ctitle">Pollen &amp; Allergens</span><span class="badge" id="m-poll-badge">—</span></div>
+    <div id="m-poll-body"></div>
+    <div class="ts" id="m-poll-ts"></div>
+  </div>
+  <div class="card">
+    <div class="ldr" id="ldr-maq"><div class="spin"></div><div class="ldr-msg">Loading air quality…</div></div>
+    <div class="card-hdr"><span class="ctitle">Air Quality</span><span class="badge" id="m-aq-badge">AirNow</span></div>
+    <div id="m-aq-body"></div>
+    <div class="ts" id="m-aq-ts"></div>
+  </div>
+  <div class="card">
+    <div class="card-hdr">
+      <span class="ctitle">How I Feel</span>
+      <button class="hbtn" id="m-export-btn" style="font-size:10px;padding:4px 9px">&#8595; Export</button>
     </div>
+    <div id="log-body-m"></div>
   </div>
-  <div class="mpanel off" id="mp-poll">
-    <div class="card">
-      <div class="ldr" id="ldr-mpoll"><div class="spin"></div><div class="ldr-msg">Loading pollen…</div></div>
-      <div class="card-hdr"><span class="ctitle">Pollen &amp; Allergens</span><span class="badge" id="m-poll-badge">—</span></div>
-      <div id="m-poll-body"></div>
-      <div class="ts" id="m-poll-ts"></div>
+</div>
+
+<!-- FORECAST -->
+<div class="mpanel off" id="mp-fcast">
+  <div class="card">
+    <div class="ldr" id="ldr-mfcast"><div class="spin"></div><div class="ldr-msg">Loading forecast…</div></div>
+    <div class="card-hdr"><span class="ctitle">Forecast</span><span class="badge">NWS</span></div>
+    <div class="ftabs" id="ftabs-m">
+      <button class="ftab on" data-tab="wx10">10-Day</button>
+      <button class="ftab" data-tab="wxhr">Hourly</button>
+      <button class="ftab" data-tab="poll10">Pollen</button>
+      <button class="ftab" data-tab="pollhr">Pollen/hr</button>
+      <button class="ftab" data-tab="aq10">Air</button>
+      <button class="ftab" data-tab="aqhr">Air/hr</button>
     </div>
+    <div id="m-fcast-body"></div>
+    <div class="ts" id="m-fcast-ts"></div>
   </div>
-  <div class="mpanel off" id="mp-aq">
-    <div class="card">
-      <div class="ldr" id="ldr-maq"><div class="spin"></div><div class="ldr-msg">Loading air quality…</div></div>
-      <div class="card-hdr"><span class="ctitle">Air Quality</span><span class="badge" id="m-aq-badge">AirNow</span></div>
-      <div id="m-aq-body"></div>
-      <div class="ts" id="m-aq-ts"></div>
+</div>
+
+<!-- LOG (mobile-only dedicated panel, same content as in Now) -->
+<div class="mpanel off" id="mp-log">
+  <div class="card">
+    <div class="card-hdr">
+      <span class="ctitle">How I Feel</span>
+      <button class="hbtn" id="ml-export-btn" style="font-size:10px;padding:4px 9px">&#8595; Export</button>
     </div>
+    <div id="log-body-ml"></div>
   </div>
-  <div class="mpanel off" id="mp-log">
-    <div class="card">
-      <div class="card-hdr">
-        <span class="ctitle">How I Feel</span>
-        <button class="hbtn" id="m-export-btn" style="font-size:10px;padding:4px 9px">&#8595; Export</button>
-      </div>
-      <div id="log-body-m"></div>
-    </div>
-  </div>
+</div>
 </main>
 
-<!-- BOTTOM NAV -->
+<!-- BOTTOM NAV — 3 tabs -->
 <nav class="bnav">
-  <button class="nb on" data-sec="cur">
-    <span class="nbdot" id="nd-cur"></span>
+  <button class="nb on" data-sec="now">
+    <span class="nbdot" id="nd-now"></span>
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="5"/><path d="M12 2v2M12 20v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M2 12h2M20 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
     Now
   </button>
@@ -333,16 +400,6 @@ main{flex:1;padding:14px 14px calc(var(--navh) + env(safe-area-inset-bottom) + 8
     <span class="nbdot" id="nd-fcast"></span>
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18M8 2v3M16 2v3"/></svg>
     Forecast
-  </button>
-  <button class="nb" data-sec="poll">
-    <span class="nbdot" id="nd-poll"></span>
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="3"/><path d="M12 2c0 4-4 6-4 10M12 2c0 4 4 6 4 10M8 22h8M12 15v7"/></svg>
-    Pollen
-  </button>
-  <button class="nb" data-sec="aq">
-    <span class="nbdot" id="nd-aq"></span>
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 8c0-1.1.9-2 2-2h14a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8z"/><path d="M7 12h2m4 0h2"/></svg>
-    Air
   </button>
   <button class="nb" data-sec="log">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>
@@ -374,63 +431,28 @@ main{flex:1;padding:14px 14px calc(var(--navh) + env(safe-area-inset-bottom) + 8
 <div class="ov" id="set-modal">
   <div class="mdl">
     <div class="mtitle">Settings &amp; API Keys</div>
-
-    <!-- NWS -->
     <div class="stsource">
-      <div class="stsource-hdr">
-        <span class="stsource-name">Weather &amp; Forecast</span>
-        <span class="stbadge stload" id="st-weather">—</span>
-      </div>
-      <div class="stsource-hdr" style="margin-top:4px">
-        <span class="stsource-name" style="color:var(--tx3)">Forecast</span>
-        <span class="stbadge stload" id="st-forecast">—</span>
-      </div>
-      <div class="fnote" style="margin-top:6px">
-        Data from <a href="https://www.weather.gov" target="_blank" style="color:var(--ac2)">National Weather Service</a>
-        (api.weather.gov) &mdash; no API key required.
-        UV index &amp; dew point supplemented by <a href="https://open-meteo.com" target="_blank" style="color:var(--ac2)">Open-Meteo</a>.
-      </div>
+      <div class="stsource-hdr"><span class="stsource-name">Weather &amp; Forecast</span><span class="stbadge stload" id="st-weather">—</span></div>
+      <div class="stsource-hdr" style="margin-top:4px"><span class="stsource-name" style="color:var(--tx3)">Forecast</span><span class="stbadge stload" id="st-forecast">—</span></div>
+      <div class="fnote" style="margin-top:6px">Data from <a href="https://www.weather.gov" target="_blank" style="color:var(--ac2)">National Weather Service</a>. UV index &amp; dew point supplemented by <a href="https://open-meteo.com" target="_blank" style="color:var(--ac2)">Open-Meteo</a>. No API key required.</div>
     </div>
-
-    <!-- AirNow -->
     <div class="stsource">
-      <div class="stsource-hdr">
-        <span class="stsource-name">Air Quality</span>
-        <span class="stbadge stload" id="st-aq">—</span>
-      </div>
+      <div class="stsource-hdr"><span class="stsource-name">Air Quality</span><span class="stbadge stload" id="st-aq">—</span></div>
       <div class="flbl" style="margin-top:8px">AirNow API Key</div>
       <input class="fi" id="set-airnow" placeholder="Paste your AirNow API key">
-      <div class="fnote">
-        Free key at <a href="https://docs.airnowapi.org/account/request/" target="_blank" style="color:var(--ac2)">airnowapi.org</a>.
-        Data from the US EPA AirNow network.
-      </div>
+      <div class="fnote">Free key at <a href="https://docs.airnowapi.org/account/request/" target="_blank" style="color:var(--ac2)">airnowapi.org</a>.</div>
     </div>
-
-    <!-- Pollen -->
     <div class="stsource">
-      <div class="stsource-hdr">
-        <span class="stsource-name">Pollen &amp; Allergens</span>
-        <span class="stbadge stload" id="st-pollen">—</span>
-      </div>
+      <div class="stsource-hdr"><span class="stsource-name">Pollen &amp; Allergens</span><span class="stbadge stload" id="st-pollen">—</span></div>
       <div class="flbl" style="margin-top:8px">Google Pollen API Key <span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--tx3)">(optional)</span></div>
       <input class="fi" id="set-pollen" placeholder="Paste your Google Pollen API key">
-      <div class="fnote">
-        If left blank, pollen data is provided automatically by
-        <a href="https://open-meteo.com" target="_blank" style="color:var(--ac2)">Open-Meteo</a> (grass, tree, weed &mdash; no key needed).
-        For more species detail, enable the
-        <a href="https://developers.google.com/maps/documentation/pollen" target="_blank" style="color:var(--ac2)">Google Pollen API</a>
-        and paste your key above.
-      </div>
+      <div class="fnote">If blank, <a href="https://open-meteo.com" target="_blank" style="color:var(--ac2)">Open-Meteo</a> pollen is used (no key needed). Google provides more species detail.</div>
     </div>
-
-    <div class="mfoot">
-      <button class="mb" id="set-cancel">Cancel</button>
-      <button class="mb p" id="set-save">Save &amp; Refresh</button>
-    </div>
+    <div class="mfoot"><button class="mb" id="set-cancel">Cancel</button><button class="mb p" id="set-save">Save &amp; Refresh</button></div>
   </div>
 </div>
 
-<!-- EDIT MODAL -->
+<!-- EDIT LOG MODAL -->
 <div class="ov" id="edit-modal">
   <div class="mdl">
     <div class="mtitle">Edit Entry</div>
@@ -443,15 +465,18 @@ main{flex:1;padding:14px 14px calc(var(--navh) + env(safe-area-inset-bottom) + 8
 <script>
 'use strict';
 
-// ════════════════════════════════════
+// ════════════════════════════════
 //  STATE
-// ════════════════════════════════════
+// ════════════════════════════════
 const S={
-  lat:null,lng:null,locName:'',
-  useFahrenheit:true,
-  weather:null,forecast:null,aq:null,pollen:null,
+  lat:null,lng:null,locName:'',useFahrenheit:true,
+  weather:null,forecast:null,forecastHourly:null,
+  aq:null,pollen:null,pollenTypes:null,
+  pollenForecast:null,  // hourly arrays {time,grass,tree,weed}
+  aqForecast:null,      // hourly arrays from Open-Meteo AQ {time,pm25,pm10,ozone,no2}
   keys:{airnow:'',pollen:''},
   logs:[],selEmojis:new Set(),editId:null,
+  fcastTab:'wx10',  // active forecast tab
 };
 
 const EMOJIS=[
@@ -463,11 +488,10 @@ const EMOJIS=[
 
 const WMO={0:'Clear sky ☀️',1:'Mainly clear 🌤️',2:'Partly cloudy ⛅',3:'Overcast ☁️',45:'Foggy 🌫️',48:'Icy fog 🌫️',51:'Light drizzle 🌦️',53:'Drizzle 🌦️',55:'Heavy drizzle 🌧️',61:'Light rain 🌧️',63:'Rain 🌧️',65:'Heavy rain 🌧️',71:'Light snow 🌨️',73:'Snow 🌨️',75:'Heavy snow ❄️',80:'Showers 🌦️',81:'Heavy showers 🌧️',82:'Violent showers ⛈️',95:'Thunderstorm ⛈️',96:'Thunderstorm+hail ⛈️',99:'Thunderstorm+hail ⛈️'};
 const wDesc=c=>WMO[c]||'Condition '+c;
-const wIcon=c=>{const m=(WMO[c]||'🌡️').match(/\p{Emoji_Presentation}/gu);return m?m[0]:'🌡️';};
 
-// ════════════════════════════════════
+// ════════════════════════════════
 //  STORAGE
-// ════════════════════════════════════
+// ════════════════════════════════
 function loadStore(){
   try{
     const k=JSON.parse(localStorage.getItem('atmo_k')||'{}');
@@ -483,311 +507,267 @@ const saveKeys=()=>localStorage.setItem('atmo_k',JSON.stringify({a:S.keys.airnow
 const saveLoc=()=>localStorage.setItem('atmo_l',JSON.stringify({lat:S.lat,lng:S.lng,n:S.locName}));
 const saveLogs=()=>localStorage.setItem('atmo_log',JSON.stringify(S.logs));
 
-// ════════════════════════════════════
-//  TEMP HELPERS
-// ════════════════════════════════════
+// ════════════════════════════════
+//  HELPERS
+// ════════════════════════════════
 const cF=c=>Math.round(c*9/5+32);
 const fT=c=>S.useFahrenheit?`${cF(c)}°F`:`${Math.round(c)}°C`;
 const fTs=c=>S.useFahrenheit?`${cF(c)}°`:`${Math.round(c)}°`;
+const setInner=(id,h)=>{const e=document.getElementById(id);if(e)e.innerHTML=h;};
+const setTxt=(id,v)=>{const e=document.getElementById(id);if(e)e.textContent=v;};
+const setBadge=(id,cls,txt)=>{const e=document.getElementById(id);if(e){e.className=cls;e.textContent=txt;}};
+const esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+const uvLabel=v=>v==null?'—':v<=2?'Low':v<=5?'Moderate':v<=7?'High':v<=10?'Very High':'Extreme';
+const aqCat=v=>v<=50?'Good':v<=100?'Moderate':v<=150?'Unhealthy for Sensitive Groups':v<=200?'Unhealthy':v<=300?'Very Unhealthy':'Hazardous';
+const aqCol=v=>v<=50?'var(--good)':v<=100?'#9a9a20':v<=150?'var(--warn)':v<=200?'var(--bad)':v<=300?'#8f3f97':'#7e0023';
+// pollen index 0-4 → colour
+const polCol=v=>['var(--good)','#80c840','var(--warn)','#e07020','var(--bad)'][Math.min(4,Math.max(0,v))];
+const polCatName=v=>['None','Very Low','Low','Moderate','High','Very High'][Math.min(5,Math.max(0,v))];
 
-// ════════════════════════════════════
-//  DIAGNOSTIC
-// ════════════════════════════════════
-let anyError=false;
+// ════════════════════════════════
+//  DIAG (settings badge)
+// ════════════════════════════════
 function diagSet(key,state,msg){
-  // Update inline status badge inside settings modal
-  const badge=document.getElementById('st-'+key);
-  if(badge){
-    badge.className='stbadge '+(state==='ok'?'stok':state==='err'?'sterr':'stload');
-    badge.textContent=msg;
-  }
-  if(state==='err') anyError=true;
+  const b=document.getElementById('st-'+key);
+  if(b){b.className='stbadge '+(state==='ok'?'stok':state==='err'?'sterr':'stload');b.textContent=msg;}
 }
 
-// ════════════════════════════════════
-//  FETCH HELPERS  — each resolves individually, renders immediately
-// ════════════════════════════════════
-async function safeFetch(url, opts){
-  const r=await fetch(url, opts||{});
-  if(!r.ok) throw new Error(`HTTP ${r.status}`);
+// ════════════════════════════════
+//  LOADERS / ERRORS
+// ════════════════════════════════
+function ldrShow(id){
+  const e=document.getElementById('ldr-'+id);
+  if(e){const m=e.querySelector('.ldr-msg');if(m)m.textContent='Loading…';const d=e.querySelector('.ldr-detail');if(d){d.textContent='';d.style.display='none';}e.classList.remove('off');}
+}
+function ldrHide(id){['ldr-'+id,'ldr-m'+id].forEach(s=>{const e=document.getElementById(s);if(e)e.classList.add('off');});}
+function showCardErr(id,msg){
+  [id,'m'+id].forEach(i=>{
+    const e=document.getElementById('ldr-'+i); if(!e)return;
+    const m=e.querySelector('.ldr-msg');if(m)m.textContent='Could not load';
+    const d=e.querySelector('.ldr-detail');if(d){d.textContent=msg;d.style.display='block';}
+    e.classList.remove('off');
+  });
+}
+function showSetup(){['cur','fcast','poll','aq'].forEach(id=>showCardErr(id,'Set your location to begin'));}
+
+async function safeFetch(url,opts){
+  const r=await fetch(url,opts||{});
+  if(!r.ok)throw new Error('HTTP '+r.status);
   return r.json();
 }
 
-// NWS: 3-step — points → forecastHourly (current) + forecast (10-day)
-// We also fetch Open-Meteo in parallel for UV index and dew point,
-// which NWS does not provide.
-const NWS_HEADERS = {
-  'User-Agent': 'atmosphere-dashboard/1.0 (personal health tracker; noreply@example.com)',
-  'Accept': 'application/geo+json',
-};
+// ════════════════════════════════
+//  NWS
+// ════════════════════════════════
+const NWS_H={'User-Agent':'atmosphere-dashboard/1.0 (personal health tracker; noreply@example.com)','Accept':'application/geo+json'};
 
-async function nwsPoints(lat, lng) {
-  const url = `https://api.weather.gov/points/${lat.toFixed(4)},${lng.toFixed(4)}`;
-  const r = await fetch(url, { headers: NWS_HEADERS });
-  if (!r.ok) throw new Error(`NWS /points HTTP ${r.status}`);
-  const d = await r.json();
-  const p = d.properties;
-  if (!p?.forecastHourly) throw new Error('NWS: no forecast URLs in response');
-  return p; // .forecastHourly, .forecast, .relativeLocation, etc.
+async function nwsPoints(){
+  const{lat,lng}=S;
+  const d=await safeFetch(`https://api.weather.gov/points/${lat.toFixed(4)},${lng.toFixed(4)}`,{headers:NWS_H});
+  if(!d.properties?.forecastHourly)throw new Error('NWS: no forecast URLs');
+  return d.properties;
 }
 
-// Fetch supplemental UV + dew point from Open-Meteo (no key, open CORS)
-async function fetchOMSupplement(lat, lng) {
-  try {
-    const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lng}` +
-      `&current=uv_index,dew_point_2m,surface_pressure,visibility` +
-      `&temperature_unit=fahrenheit&timezone=auto`;
-    const r = await fetch(url);
-    if (!r.ok) return null;
-    const d = await r.json();
-    return d.current;
-  } catch { return null; }
-}
-
-async function fetchWeather() {
-  const { lat, lng } = S;
-  diagSet('weather', 'loading', 'Fetching NWS grid…');
-  try {
-    // Step 1: resolve grid
-    const pts = await nwsPoints(lat, lng);
-    diagSet('weather', 'loading', 'Fetching hourly obs…');
-
-    // Step 2: fetch hourly forecast and Open-Meteo supplement in parallel
-    const [hourlyRes, omRes] = await Promise.all([
-      fetch(pts.forecastHourly, { headers: NWS_HEADERS }),
-      fetchOMSupplement(lat, lng),
+async function fetchWeather(){
+  diagSet('weather','loading','Fetching NWS…');
+  try{
+    const pts=await nwsPoints();
+    const[hourlyRes,omRes]=await Promise.all([
+      fetch(pts.forecastHourly,{headers:NWS_H}),
+      fetchOMSupplement(),
     ]);
-    if (!hourlyRes.ok) throw new Error(`NWS hourly HTTP ${hourlyRes.status}`);
-    const hourly = await hourlyRes.json();
-    const periods = hourly.properties?.periods;
-    if (!periods?.length) throw new Error('NWS: no hourly periods');
-
-    // Current = first active period
-    const cur = periods[0];
-
-    // Parse NWS values — already in °F and mph
-    const tempF = cur.temperature;
-    const tempC = (tempF - 32) * 5 / 9;
-    const wind = parseInt(cur.windSpeed) || 0; // "12 mph" → 12
-    const humid = cur.relativeHumidity?.value ?? null;
-    const desc = cur.shortForecast || '';
-    const icon = nwsIcon(desc, cur.isDaytime);
-
-    // Merge Open-Meteo supplement for fields NWS lacks
-    const uv = omRes?.uv_index ?? null;
-    const dewC = omRes?.dew_point_2m ?? null;
-    const pressHpa = omRes?.surface_pressure ?? null;
-    const visM = omRes?.visibility ?? null;
-    // apparent_temperature: NWS windChill or heatIndex if present, else estimate
-    const feelsF = cur.windChill?.value ?? cur.heatIndex?.value ?? null;
-    const feelsC = feelsF != null ? (feelsF - 32) * 5 / 9 : null;
-
-    // Store in normalised shape compatible with renderWeather
-    S.weather = {
-      source: 'nws',
-      tempF, tempC,
-      feelsF, feelsC,
-      humidity: humid,
-      windMph: wind,
-      windDir: cur.windDirection || '',
-      desc,
-      icon,
-      isDaytime: cur.isDaytime,
-      uv,
-      dewC,
-      pressHpa,
-      visM,
-      startTime: cur.startTime,
+    if(!hourlyRes.ok)throw new Error('NWS hourly HTTP '+hourlyRes.status);
+    const hourly=await hourlyRes.json();
+    const periods=hourly.properties?.periods;
+    if(!periods?.length)throw new Error('NWS: no hourly periods');
+    const cur=periods[0];
+    const tempF=cur.temperature;
+    S.weather={
+      source:'nws',
+      tempF,tempC:(tempF-32)*5/9,
+      feelsF:cur.windChill?.value??cur.heatIndex?.value??null,
+      feelsC:null,
+      humidity:cur.relativeHumidity?.value??null,
+      windMph:parseInt(cur.windSpeed)||0,
+      windDir:cur.windDirection||'',
+      desc:cur.shortForecast||'',
+      icon:nwsIcon(cur.shortForecast||'',cur.isDaytime),
+      isDaytime:cur.isDaytime,
+      uv:omRes?.uv_index??null,
+      dewC:omRes?.dew_point_2m??null,
+      pressHpa:omRes?.surface_pressure??null,
+      visM:omRes?.visibility??null,
+      startTime:cur.startTime,
     };
-    diagSet('weather', 'ok', 'NWS ✓' + (omRes ? ' + Open-Meteo (UV/dew)' : ''));
+    S.weather.feelsC=S.weather.feelsF!=null?(S.weather.feelsF-32)*5/9:null;
+    // Store NWS hourly for hourly forecast tab (next 24 periods)
+    S.forecastHourly=periods.slice(0,24);
+    diagSet('weather','ok','NWS ✓'+(omRes?' + Open-Meteo':''));
     renderWeather(S.weather);
-  } catch (e) {
-    diagSet('weather', 'err', e.message);
-    showCardErr('cur', 'Weather: ' + e.message);
-  }
+  }catch(e){diagSet('weather','err',e.message);showCardErr('cur','Weather: '+e.message);}
 }
 
-async function fetchForecast() {
-  const { lat, lng } = S;
-  diagSet('forecast', 'loading', 'Fetching NWS grid…');
-  try {
-    const pts = await nwsPoints(lat, lng);
-    diagSet('forecast', 'loading', 'Fetching daily forecast…');
-    const r = await fetch(pts.forecast, { headers: NWS_HEADERS });
-    if (!r.ok) throw new Error(`NWS forecast HTTP ${r.status}`);
-    const data = await r.json();
-    const periods = data.properties?.periods;
-    if (!periods?.length) throw new Error('NWS: no forecast periods');
-    diagSet('forecast', 'ok', 'NWS ✓');
-    renderForecast(periods);
-  } catch (e) {
-    diagSet('forecast', 'err', e.message);
-    showCardErr('fcast', 'Forecast: ' + e.message);
-  }
+async function fetchForecast(){
+  diagSet('forecast','loading','Fetching NWS…');
+  try{
+    const pts=await nwsPoints();
+    const r=await fetch(pts.forecast,{headers:NWS_H});
+    if(!r.ok)throw new Error('NWS forecast HTTP '+r.status);
+    const data=await r.json();
+    const periods=data.properties?.periods;
+    if(!periods?.length)throw new Error('NWS: no periods');
+    S.forecast=periods;
+    diagSet('forecast','ok','NWS ✓');
+    renderFcastTab(); // render whichever tab is active
+  }catch(e){diagSet('forecast','err',e.message);showCardErr('fcast','Forecast: '+e.message);}
 }
 
-// Map NWS short forecast text → emoji icon
-function nwsIcon(desc, isDaytime) {
-  const d = desc.toLowerCase();
-  if (d.includes('tornado') || d.includes('hurricane')) return '🌪️';
-  if (d.includes('thunder') || d.includes('t-storm'))   return '⛈️';
-  if (d.includes('hail'))                                return '🌨️';
-  if (d.includes('blizzard') || d.includes('heavy snow'))return '❄️';
-  if (d.includes('snow') || d.includes('flurr'))         return '🌨️';
-  if (d.includes('sleet') || d.includes('freezing'))     return '🌧️';
-  if (d.includes('rain') || d.includes('shower'))        return '🌧️';
-  if (d.includes('drizzle'))                             return '🌦️';
-  if (d.includes('fog') || d.includes('mist'))           return '🌫️';
-  if (d.includes('windy') || d.includes('breezy'))       return '💨';
-  if (d.includes('overcast') || d.includes('cloudy'))    return '☁️';
-  if (d.includes('mostly cloudy') || d.includes('mostly overcast')) return '🌥️';
-  if (d.includes('partly cloudy') || d.includes('partly sunny'))    return '⛅';
-  if (d.includes('sunny') || d.includes('clear'))        return isDaytime ? '☀️' : '🌙';
-  return isDaytime ? '🌤️' : '🌙';
+async function fetchOMSupplement(){
+  try{
+    const{lat,lng}=S;
+    const d=await safeFetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lng}&current=uv_index,dew_point_2m,surface_pressure,visibility&temperature_unit=fahrenheit&timezone=auto`);
+    return d.current;
+  }catch{return null;}
 }
 
-// AirNow — AirNow blocks direct browser CORS requests.
-// We use corsproxy.io which adds the required CORS headers.
+function nwsIcon(desc,day){
+  const d=desc.toLowerCase();
+  if(d.includes('tornado')||d.includes('hurricane'))return'🌪️';
+  if(d.includes('thunder')||d.includes('t-storm'))return'⛈️';
+  if(d.includes('hail'))return'🌨️';
+  if(d.includes('blizzard')||d.includes('heavy snow'))return'❄️';
+  if(d.includes('snow')||d.includes('flurr'))return'🌨️';
+  if(d.includes('sleet')||d.includes('freezing'))return'🌧️';
+  if(d.includes('rain')||d.includes('shower'))return'🌧️';
+  if(d.includes('drizzle'))return'🌦️';
+  if(d.includes('fog')||d.includes('mist'))return'🌫️';
+  if(d.includes('windy')||d.includes('breezy'))return'💨';
+  if(d.includes('mostly cloudy')||d.includes('mostly overcast'))return'🌥️';
+  if(d.includes('overcast')||d.includes('cloudy'))return'☁️';
+  if(d.includes('partly cloudy')||d.includes('partly sunny'))return'⛅';
+  if(d.includes('sunny')||d.includes('clear'))return day?'☀️':'🌙';
+  return day?'🌤️':'🌙';
+}
+
+// ════════════════════════════════
+//  AIR QUALITY
+// ════════════════════════════════
 async function fetchAQ(){
   const{lat,lng}=S;
   if(!S.keys.airnow){
-    diagSet('aq','err','Add your AirNow API key in Settings ⚙');
+    diagSet('aq','err','Add AirNow key in Settings ⚙');
     showCardErr('aq','Add AirNow key in Settings ⚙');
+    // Still try to get OM AQ forecast for forecast tabs
+    fetchAQForecast();
     return;
   }
   diagSet('aq','loading','Fetching…');
   try{
-    const direct=
-      `https://www.airnowapi.org/aq/observation/latLong/current/?format=application/json`+
-      `&latitude=${lat}&longitude=${lng}&distance=25&API_KEY=${S.keys.airnow}`;
+    const direct=`https://www.airnowapi.org/aq/observation/latLong/current/?format=application/json&latitude=${lat}&longitude=${lng}&distance=25&API_KEY=${S.keys.airnow}`;
     const url=`https://corsproxy.io/?url=${encodeURIComponent(direct)}`;
     const r=await fetch(url);
-    if(!r.ok) throw new Error(`AirNow HTTP ${r.status}`);
+    if(!r.ok)throw new Error('AirNow HTTP '+r.status);
     const data=await r.json();
-    if(!Array.isArray(data)) throw new Error('Unexpected AirNow response format');
-    if(data.length===0) throw new Error('No AirNow observations within 25 mi');
+    if(!Array.isArray(data))throw new Error('Unexpected AirNow format');
+    if(data.length===0)throw new Error('No AirNow observations within 25 mi');
+    S.aq=data;
     diagSet('aq','ok','AirNow ✓');
     renderAQ(data);
+    renderAlerts(); // refresh alerts strip now that AQ is available
   }catch(e){
     diagSet('aq','err',e.message);
     showCardErr('aq','Air Quality: '+e.message);
   }
+  fetchAQForecast();
 }
 
-// Pollen: Google API (if key provided) else Open-Meteo (no key required)
+// Open-Meteo AQ: hourly PM2.5, PM10, ozone, NO2 — 3 days
+async function fetchAQForecast(){
+  const{lat,lng}=S;
+  try{
+    const d=await safeFetch(
+      `https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${lat}&longitude=${lng}`+
+      `&hourly=pm2_5,pm10,ozone,nitrogen_dioxide&timezone=auto&forecast_days=3`
+    );
+    S.aqForecast=d.hourly;
+    renderFcastTab();
+  }catch(e){console.warn('AQ forecast',e);}
+}
+
+// ════════════════════════════════
+//  POLLEN
+// ════════════════════════════════
 async function fetchPollen(){
   const{lat,lng}=S;
   diagSet('pollen','loading','Fetching…');
   try{
-    // Google Pollen API
     if(S.keys.pollen){
-      const d=await safeFetch(
-        `https://pollen.googleapis.com/v1/forecast:lookup?key=${S.keys.pollen}`+
-        `&location.longitude=${lng}&location.latitude=${lat}&days=1`
-      );
+      // Google: request 5 days for forecast
+      const d=await safeFetch(`https://pollen.googleapis.com/v1/forecast:lookup?key=${S.keys.pollen}&location.longitude=${lng}&location.latitude=${lat}&days=5`);
       diagSet('pollen','ok','Google Pollen ✓');
-      renderPollen(d,'google'); return;
+      renderPollen(d,'google');
+    }else{
+      // Open-Meteo: 5 days hourly
+      const d=await safeFetch(
+        `https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${lat}&longitude=${lng}`+
+        `&hourly=grass_pollen,tree_pollen,weed_pollen&timezone=auto&forecast_days=5`
+      );
+      diagSet('pollen','ok','Open-Meteo ✓');
+      // Store hourly for forecast tab
+      S.pollenForecast=d.hourly;
+      renderPollen(d,'openmeteo');
     }
-    // Open-Meteo pollen (no key required)
-    const d=await safeFetch(
-      `https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${lat}&longitude=${lng}`+
-      `&hourly=grass_pollen,tree_pollen,weed_pollen&timezone=auto&forecast_days=1`
-    );
-    diagSet('pollen','ok','Open-Meteo ✓');
-    renderPollen(d,'openmeteo');
-  }catch(e){
-    diagSet('pollen','err',e.message);
-    showCardErr('poll','Pollen: '+e.message);
-  }
+  }catch(e){diagSet('pollen','err',e.message);showCardErr('poll','Pollen: '+e.message);}
 }
 
-// ════════════════════════════════════
-//  LOAD (fires all 4 independently — each renders as it arrives)
-// ════════════════════════════════════
+// ════════════════════════════════
+//  LOAD ALL
+// ════════════════════════════════
 function loadAll(){
   if(!S.lat||!S.lng){showSetup();return;}
-  anyError=false;
-  document.getElementById('diagbar').classList.remove('on');
   ldrShow('cur');ldrShow('fcast');ldrShow('poll');ldrShow('aq');
   ldrShow('mcur');ldrShow('mfcast');ldrShow('mpoll');ldrShow('maq');
-  // Fire independently — no await — each resolves and renders on its own
   fetchWeather();
   fetchForecast();
   fetchAQ();
   fetchPollen();
 }
 
-// ════════════════════════════════════
-//  LOADER / ERROR HELPERS
-// ════════════════════════════════════
-function ldrShow(id){
-  const e=document.getElementById('ldr-'+id);
-  if(e){const m=e.querySelector('.ldr-msg');if(m)m.textContent='Loading…';const d=e.querySelector('.ldr-detail');if(d){d.textContent='';d.style.display='none';}e.classList.remove('off');}
-}
-function ldrHide(id){const e=document.getElementById('ldr-'+id);if(e)e.classList.add('off');}
-function ldrHideM(id){const e=document.getElementById('ldr-m'+id);if(e)e.classList.add('off');}
-
-function showCardErr(id,msg){
-  const ids=[id,'m'+id];
-  ids.forEach(i=>{
-    const e=document.getElementById('ldr-'+i); if(!e)return;
-    const m=e.querySelector('.ldr-msg'); if(m)m.textContent='Could not load';
-    const d=e.querySelector('.ldr-detail');
-    if(d){d.textContent=msg;d.style.display='block';}
-    e.classList.remove('off');
-  });
-}
-
-function showSetup(){
-  ['cur','fcast','poll','aq'].forEach(id=>showCardErr(id,'Set your location to begin'));
-}
-
-// ════════════════════════════════════
+// ════════════════════════════════
 //  RENDER WEATHER
-// ════════════════════════════════════
-function renderWeather(c) {
-  // c is the normalised NWS+OM object stored in S.weather
-  const tempF = c.tempF, tempC = c.tempC;
-  const feelsF = c.feelsF, feelsC = c.feelsC;
-  const humid = c.humidity, wind = c.windMph, windDir = c.windDir;
-  const desc = c.desc, icon = c.icon;
-  const uv = c.uv, dewC = c.dewC, pressHpa = c.pressHpa, visM = c.visM;
+// ════════════════════════════════
+function renderWeather(c){
+  const tempF=c.tempF,tempC=c.tempC;
+  const feelsF=c.feelsF,feelsC=c.feelsC;
+  const humid=c.humidity,wind=c.windMph,windDir=c.windDir;
+  const uv=c.uv,dewC=c.dewC,pressHpa=c.pressHpa,visM=c.visM;
 
-  // Display values
-  const tDisp  = S.useFahrenheit ? Math.round(tempF)  : Math.round(tempC);
-  const tUnit  = S.useFahrenheit ? '°F' : '°C';
-  const fDisp  = feelsF != null ? (S.useFahrenheit ? Math.round(feelsF)+'°F' : Math.round(feelsC)+'°C') : '—';
-  const dewDisp= dewC != null   ? (S.useFahrenheit ? Math.round(dewC*9/5+32)+'°F' : Math.round(dewC)+'°C') : '—';
-  const visDisp= visM != null   ? (visM >= 1000 ? (visM/1000).toFixed(1)+' km' : visM+' m') : '—';
-  const presDisp = pressHpa != null ? Math.round(pressHpa)+' hPa' : '—';
+  const tDisp=S.useFahrenheit?Math.round(tempF):Math.round(tempC);
+  const tUnit=S.useFahrenheit?'°F':'°C';
+  const fDisp=feelsF!=null?(S.useFahrenheit?Math.round(feelsF)+'°F':Math.round(feelsC)+'°C'):'—';
+  const dewDisp=dewC!=null?(S.useFahrenheit?Math.round(dewC*9/5+32)+'°F':Math.round(dewC)+'°C'):'—';
+  const visDisp=visM!=null?(visM>=1000?(visM/1000).toFixed(1)+' km':visM+' m'):'—';
+  const presDisp=pressHpa!=null?Math.round(pressHpa)+' hPa':'—';
 
-  // Thresholds (work in °F for NWS data)
-  const isHot   = tempF > 95;
-  const isCold  = tempF < 15;
-  const isWind  = wind > 40;
-  const isHumid = humid != null && humid > 85;
-  const isUV    = uv != null && uv >= 8;
-  const tCol = isHot ? 'var(--bad)' : isCold ? 'var(--ac2)' : 'var(--tx)';
+  const isHot=tempF>95,isCold=tempF<15,isWind=wind>40,isHumid=humid!=null&&humid>85,isUV=uv!=null&&uv>=8;
+  const tCol=isHot?'var(--bad)':isCold?'var(--ac2)':'var(--tx)';
+  const msgs=[];
+  if(isHot)msgs.push('High heat: '+Math.round(tempF)+'°F');
+  if(isCold)msgs.push('Extreme cold: '+Math.round(tempF)+'°F');
+  if(isWind)msgs.push('High winds: '+wind+' mph');
+  if(isUV)msgs.push('Very high UV: '+uv);
+  const alertH=msgs.length?`<div class="abar on">&#9888; ${msgs.join(' &middot; ')}</div>`:'';
+  const uvW=uv!=null?Math.min(100,(uv/12)*100):0;
+  const uvC=uv>=8?'var(--bad)':uv>=6?'var(--warn)':'var(--good)';
+  const uvDisp=uv!=null?`${uv} — ${uvLabel(uv)}`:'— (no supplement data)';
+  const badgeCls=msgs.length?'badge bb':'badge bg';
+  const badgeTxt=msgs.length?'Extreme':'Normal';
+  const windDisp=wind?wind+' mph '+(windDir||''):'—';
 
-  const msgs = [];
-  if (isHot)  msgs.push('High heat: '+Math.round(tempF)+'°F');
-  if (isCold) msgs.push('Extreme cold: '+Math.round(tempF)+'°F');
-  if (isWind) msgs.push('High winds: '+wind+' mph');
-  if (isUV)   msgs.push('Very high UV: '+uv);
-  const alertH = msgs.length ? `<div class="abar on">&#9888; ${msgs.join(' &middot; ')}</div>` : '';
-
-  const uvW = uv != null ? Math.min(100,(uv/12)*100) : 0;
-  const uvC = uv>=8 ? 'var(--bad)' : uv>=6 ? 'var(--warn)' : 'var(--good)';
-  const uvDisp = uv != null ? `${uv} — ${uvLabel(uv)}` : 'N/A (Open-Meteo unavailable)';
-  const badgeCls = msgs.length ? 'badge bb' : 'badge bg';
-  const badgeTxt = msgs.length ? 'Extreme' : 'Normal';
-
-  const windDisp = wind ? wind+' mph '+(windDir||'') : '—';
-
-  const html = `
+  const html=`
     ${alertH}
     <div class="bigT" style="color:${tCol}">${tDisp}<sup>${tUnit}</sup></div>
-    <div class="cdesc">${icon} ${desc}</div>
+    <div class="cdesc">${c.icon} ${c.desc}</div>
     <div class="sgrid">
       <div class="stat"><div class="slbl">Feels like</div><div class="sval">${fDisp}</div></div>
       <div class="stat"><div class="slbl">Humidity</div><div class="sval${isHumid?' wn':''}">${humid!=null?humid+'%':'—'}</div></div>
@@ -801,81 +781,274 @@ function renderWeather(c) {
         <div class="uvbar"><div class="uvfill" style="width:${uvW}%;background:${uvC}"></div></div>
       </div>
     </div>`;
-  const ts = 'Updated '+new Date().toLocaleTimeString();
+  const ts='Updated '+new Date().toLocaleTimeString();
   setInner('cur-body',html); setInner('m-cur-body',html);
   setBadge('cur-badge',badgeCls,badgeTxt); setBadge('m-cur-badge',badgeCls,badgeTxt);
   setTxt('cur-ts',ts); setTxt('m-cur-ts',ts);
-  ldrHide('cur'); ldrHideM('cur');
-  document.getElementById('nd-cur')?.classList.toggle('on',msgs.length>0);
+  ldrHide('cur');
+  document.getElementById('nd-now')?.classList.toggle('on',msgs.length>0);
 }
-const uvLabel=v=>v<=2?'Low':v<=5?'Moderate':v<=7?'High':v<=10?'Very High':'Extreme';
 
-// ════════════════════════════════════
-//  RENDER FORECAST
-// ════════════════════════════════════
-function renderForecast(periods) {
-  // NWS periods: alternating day/night. We want daytime periods only for the
-  // card row, then show overnight low beneath each. Cap at 10 days.
-  // Period.isDaytime=true for day, false for night.
-  // NWS returns up to 14 periods (7 day+night pairs) from /forecast.
-  // The first period could be night if called after ~6pm — handle that.
+// ════════════════════════════════
+//  RENDER ALERTS STRIP
+// ════════════════════════════════
+function renderAlerts(){
+  const items=[];
 
-  const days = [];
-  for (let i = 0; i < periods.length && days.length < 10; i++) {
-    const p = periods[i];
-    if (!p.isDaytime) continue; // skip overnight periods for the main row
-    // Find the matching overnight period (next period, isDaytime=false)
-    const night = periods[i+1] && !periods[i+1].isDaytime ? periods[i+1] : null;
-    days.push({ day: p, night });
-  }
-  // Edge case: if all periods are night (very unlikely but defensive)
-  if (!days.length) {
-    // Just show whatever periods we have
-    for (let i = 0; i < Math.min(periods.length, 10); i++) {
-      days.push({ day: periods[i], night: null });
-    }
+  // AQ: show anything with AQI > 100 (Moderate threshold)
+  if(S.aq?.length){
+    S.aq.forEach(o=>{
+      if(o.AQI>100){
+        const lvl=o.AQI>200?'vhi':o.AQI>150?'hi':'mod';
+        const col=aqCol(o.AQI);
+        items.push({icon:'💨',name:o.ParameterName,cat:o.Category?.Name||aqCat(o.AQI),badge:o.AQI+' AQI',lvl,col});
+      }
+    });
   }
 
-  let html = '', hasAlert = false;
-  days.forEach((pair, i) => {
-    const p = pair.day;
-    const dt = new Date(p.startTime);
-    const name = i === 0 ? 'Today' : dt.toLocaleDateString('en-US', { weekday: 'short' });
-    const hiF = p.temperature;               // always °F from NWS
-    const loF = pair.night ? pair.night.temperature : null;
-    const hiDisp = S.useFahrenheit ? Math.round(hiF)+'°' : Math.round((hiF-32)*5/9)+'°';
-    const loDisp = loF != null ? (S.useFahrenheit ? Math.round(loF)+'°' : Math.round((loF-32)*5/9)+'°') : '—';
-    const desc = p.shortForecast || '';
-    const icon = nwsIcon(desc, true);
-    const precip = p.probabilityOfPrecipitation?.value;
-    const precipDisp = precip != null && precip > 0 ? `<div class="fdr">&#128167;${Math.round(precip)}%</div>` : '';
+  // Pollen: show index ≥ 2 (Moderate)
+  if(S.pollenTypes?.length){
+    S.pollenTypes.forEach(t=>{
+      if(t.idx>=2){
+        const lvl=t.idx>=4?'vhi':t.idx>=3?'hi':'mod';
+        items.push({icon:'🌿',name:t.name+' Pollen',cat:t.cat||polCatName(t.idx),badge:polCatName(t.idx),lvl,col:polCol(t.idx)});
+      }
+    });
+  }
 
-    // Alert thresholds in °F
-    const xa = hiF > 100 || (loF != null && loF < 5);
-    const xw = hiF > 92  || (loF != null && loF < 20) || (precip != null && precip > 70);
-    if (xa) hasAlert = true;
+  const alertBadgeCls=items.length?(items.some(i=>i.lvl==='vhi')?'badge bb':items.some(i=>i.lvl==='hi')?'badge bw':'badge bw'):'badge bg';
+  const alertBadgeTxt=items.length?items.length+' elevated':'All clear';
+  setBadge('alerts-badge',alertBadgeCls,alertBadgeTxt);
+  setBadge('m-alerts-badge',alertBadgeCls,alertBadgeTxt);
+  document.getElementById('nd-now')?.classList.toggle('on',items.some(i=>i.lvl==='vhi'));
 
-    html += `<div class="fd${i===0?' td':''}${xa?' fa':xw?' fw':''}">
+  if(!items.length){
+    const h='<div class="alerts-empty">&#10003; No elevated allergens or pollutants right now</div>';
+    setInner('alerts-body',h); setInner('m-alerts-body',h);
+    return;
+  }
+  const html=`<div class="alerts-strip">${items.map(i=>`
+    <div class="alert-item lvl-${i.lvl}">
+      <span class="alert-icon">${i.icon}</span>
+      <span class="alert-info"><span class="alert-name">${i.name}</span><div class="alert-cat">${i.cat}</div></span>
+      <span class="alert-badge">${i.badge}</span>
+    </div>`).join('')}</div>`;
+  setInner('alerts-body',html); setInner('m-alerts-body',html);
+}
+
+// ════════════════════════════════
+//  RENDER FORECAST TABS
+// ════════════════════════════════
+function renderFcastTab(){
+  const tab=S.fcastTab;
+  let html='',ts='';
+  if(tab==='wx10' && S.forecast)       {html=buildWx10();  ts='NWS ✓';}
+  else if(tab==='wxhr' && S.forecastHourly) {html=buildWxHr(); ts='NWS hourly ✓';}
+  else if(tab==='poll10'&& S.pollenForecast){html=buildPoll10();ts='Open-Meteo ✓';}
+  else if(tab==='pollhr'&& S.pollenForecast){html=buildPollHr();ts='Open-Meteo hourly ✓';}
+  else if(tab==='aq10' && S.aqForecast)    {html=buildAQ10(); ts='Open-Meteo ✓';}
+  else if(tab==='aqhr' && S.aqForecast)    {html=buildAQHr(); ts='Open-Meteo hourly ✓';}
+  else html='<div class="nodata">Loading…</div>';
+
+  setInner('fcast-body',html); setInner('m-fcast-body',html);
+  setTxt('fcast-ts',ts); setTxt('m-fcast-ts',ts);
+  ldrHide('fcast');
+}
+
+// 10-day weather (NWS daytime periods)
+function buildWx10(){
+  const periods=S.forecast;
+  const days=[];
+  for(let i=0;i<periods.length&&days.length<10;i++){
+    if(!periods[i].isDaytime)continue;
+    days.push({day:periods[i],night:(!periods[i+1]?.isDaytime?periods[i+1]:null)});
+  }
+  if(!days.length) for(let i=0;i<Math.min(periods.length,10);i++)days.push({day:periods[i],night:null});
+  let html='',alert=false;
+  days.forEach((pair,i)=>{
+    const p=pair.day;
+    const dt=new Date(p.startTime);
+    const name=i===0?'Today':dt.toLocaleDateString('en-US',{weekday:'short'});
+    const hiF=p.temperature,loF=pair.night?.temperature??null;
+    const hiD=S.useFahrenheit?Math.round(hiF)+'°':Math.round((hiF-32)*5/9)+'°';
+    const loD=loF!=null?(S.useFahrenheit?Math.round(loF)+'°':Math.round((loF-32)*5/9)+'°'):'—';
+    const icon=nwsIcon(p.shortForecast||'',true);
+    const prcp=p.probabilityOfPrecipitation?.value;
+    const prcpD=prcp!=null&&prcp>0?`<div class="fdr">&#128167;${Math.round(prcp)}%</div>`:'';
+    const xa=hiF>100||(loF!=null&&loF<5),xw=hiF>92||(loF!=null&&loF<20)||(prcp!=null&&prcp>70);
+    if(xa)alert=true;
+    html+=`<div class="fd${i===0?' td':''}${xa?' fa':xw?' fw':''}"><div class="fddot"></div><div class="fdn">${name}</div><div class="fdi">${icon}</div><div class="fdh">${hiD}</div><div class="fdl">${loD}</div>${prcpD}</div>`;
+  });
+  document.getElementById('nd-fcast')?.classList.toggle('on',alert);
+  return`<div class="frow">${html}</div>`;
+}
+
+// Hourly weather (NWS next 24h)
+function buildWxHr(){
+  const periods=S.forecastHourly||[];
+  let html='';
+  periods.slice(0,24).forEach((p,i)=>{
+    const dt=new Date(p.startTime);
+    const label=dt.toLocaleTimeString('en-US',{hour:'numeric',hour12:true}).replace(' ','');
+    const tF=p.temperature;
+    const tD=S.useFahrenheit?tF+'°':Math.round((tF-32)*5/9)+'°';
+    const icon=nwsIcon(p.shortForecast||'',p.isDaytime);
+    const prcp=p.probabilityOfPrecipitation?.value;
+    const prcpD=prcp!=null&&prcp>0?`<div class="fdr">&#128167;${prcp}%</div>`:'';
+    html+=`<div class="fd${i===0?' td':''}"><div class="fdn">${label}</div><div class="fdi">${icon}</div><div class="fdh">${tD}</div>${prcpD}</div>`;
+  });
+  return`<div class="frow hourly">${html}</div>`;
+}
+
+// Pollen scale helper: grains/m³ → 0-4 index
+const omPolScale=v=>v<=0?0:v<=10?1:v<=50?2:v<=200?3:4;
+
+// Build daily pollen rows from hourly data (take max per day)
+function pollenDailyFromHourly(h){
+  const days={};
+  (h.time||[]).forEach((t,i)=>{
+    const day=t.slice(0,10);
+    if(!days[day])days[day]={grass:0,tree:0,weed:0};
+    days[day].grass=Math.max(days[day].grass,h.grass_pollen?.[i]??0);
+    days[day].tree =Math.max(days[day].tree, h.tree_pollen?.[i]??0);
+    days[day].weed =Math.max(days[day].weed, h.weed_pollen?.[i]??0);
+  });
+  return Object.entries(days).slice(0,5);
+}
+
+// 5-day pollen (daily max)
+function buildPoll10(){
+  const h=S.pollenForecast;
+  if(!h)return'<div class="nodata">No pollen forecast data</div>';
+  const days=pollenDailyFromHourly(h);
+  let html='';
+  days.forEach(([date,d],i)=>{
+    const dt=new Date(date+'T12:00:00');
+    const name=i===0?'Today':dt.toLocaleDateString('en-US',{weekday:'short'});
+    const gi=omPolScale(d.grass),ti=omPolScale(d.tree),wi=omPolScale(d.weed);
+    const worst=Math.max(gi,ti,wi);
+    const cls=worst>=4?' fa':worst>=2?' fw':'';
+    html+=`<div class="fd${i===0?' td':''}${cls}">
       <div class="fddot"></div>
       <div class="fdn">${name}</div>
-      <div class="fdi">${icon}</div>
-      <div class="fdh">${hiDisp}</div>
-      <div class="fdl">${loDisp}</div>
-      ${precipDisp}
+      <div class="fdp">
+        <div class="fdpi"><span style="background:${polCol(gi)}"></span>Grass ${polCatName(gi).slice(0,3)}</div>
+        <div class="fdpi"><span style="background:${polCol(ti)}"></span>Tree ${polCatName(ti).slice(0,3)}</div>
+        <div class="fdpi"><span style="background:${polCol(wi)}"></span>Weed ${polCatName(wi).slice(0,3)}</div>
+      </div>
     </div>`;
   });
-
-  const ts = 'Updated '+new Date().toLocaleTimeString();
-  setInner('fcast-body',  `<div class="frow">${html}</div>`);
-  setInner('m-fcast-body',`<div class="frow">${html}</div>`);
-  setTxt('fcast-ts',ts); setTxt('m-fcast-ts',ts);
-  ldrHide('fcast'); ldrHideM('fcast');
-  document.getElementById('nd-fcast')?.classList.toggle('on',hasAlert);
+  return`<div class="frow" style="grid-template-columns:repeat(5,minmax(80px,1fr))">${html}</div>`;
 }
 
-// ════════════════════════════════════
-//  RENDER AQ
-// ════════════════════════════════════
+// Hourly pollen (next 24h)
+function buildPollHr(){
+  const h=S.pollenForecast;
+  if(!h)return'<div class="nodata">No pollen forecast data</div>';
+  const now=new Date();
+  let html='',count=0;
+  (h.time||[]).forEach((t,i)=>{
+    if(count>=24)return;
+    if(new Date(t)<now)return;
+    const dt=new Date(t);
+    const label=dt.toLocaleTimeString('en-US',{hour:'numeric',hour12:true}).replace(' ','');
+    const gi=omPolScale(h.grass_pollen?.[i]??0),ti=omPolScale(h.tree_pollen?.[i]??0),wi=omPolScale(h.weed_pollen?.[i]??0);
+    const worst=Math.max(gi,ti,wi);
+    html+=`<div class="fd${worst>=4?' fa':worst>=2?' fw':''}">
+      <div class="fdn">${label}</div>
+      <div class="fdp">
+        <div class="fdpi"><span style="background:${polCol(gi)}"></span>G</div>
+        <div class="fdpi"><span style="background:${polCol(ti)}"></span>T</div>
+        <div class="fdpi"><span style="background:${polCol(wi)}"></span>W</div>
+      </div>
+    </div>`;
+    count++;
+  });
+  return`<div class="frow hourly">${html||'<div class="nodata">No upcoming data</div>'}</div>`;
+}
+
+// Build daily AQ from hourly (max per day)
+function aqDailyFromHourly(h){
+  const days={};
+  (h.time||[]).forEach((t,i)=>{
+    const day=t.slice(0,10);
+    if(!days[day])days[day]={pm25:0,pm10:0,ozone:0,no2:0};
+    days[day].pm25 =Math.max(days[day].pm25, h.pm2_5?.[i]??0);
+    days[day].pm10 =Math.max(days[day].pm10, h.pm10?.[i]??0);
+    days[day].ozone=Math.max(days[day].ozone,h.ozone?.[i]??0);
+    days[day].no2  =Math.max(days[day].no2,  h.nitrogen_dioxide?.[i]??0);
+  });
+  return Object.entries(days).slice(0,3);
+}
+
+// μg/m³ → rough AQI colour (simplified breakpoints)
+function omAQCol(pm25){
+  if(pm25<=12)return'var(--good)';
+  if(pm25<=35)return'#9a9a20';
+  if(pm25<=55)return'var(--warn)';
+  if(pm25<=150)return'var(--bad)';
+  return'#8f3f97';
+}
+function omAQLabel(pm25){
+  if(pm25<=12)return'Good';
+  if(pm25<=35)return'Mod';
+  if(pm25<=55)return'USG';
+  if(pm25<=150)return'Unhealthy';
+  return'V.Unhealthy';
+}
+
+// 3-day AQ (daily max PM2.5)
+function buildAQ10(){
+  const h=S.aqForecast;
+  if(!h)return'<div class="nodata">No air quality forecast</div>';
+  const days=aqDailyFromHourly(h);
+  let html='';
+  days.forEach(([date,d],i)=>{
+    const dt=new Date(date+'T12:00:00');
+    const name=i===0?'Today':dt.toLocaleDateString('en-US',{weekday:'short'});
+    const col=omAQCol(d.pm25);
+    const lbl=omAQLabel(d.pm25);
+    const bad=d.pm25>55;
+    html+=`<div class="fd${i===0?' td':''}${bad?' fa':''}">
+      <div class="fddot"></div>
+      <div class="fdn">${name}</div>
+      <div class="fdi" style="font-size:13px;color:${col}">${lbl}</div>
+      <div class="fdp">
+        <div class="fdpi">PM2.5 ${Math.round(d.pm25)}</div>
+        <div class="fdpi">PM10 ${Math.round(d.pm10)}</div>
+        <div class="fdpi">O&#8323; ${Math.round(d.ozone)}</div>
+      </div>
+    </div>`;
+  });
+  return`<div class="frow" style="grid-template-columns:repeat(3,minmax(90px,1fr))">${html}</div>`;
+}
+
+// Hourly AQ (next 24h)
+function buildAQHr(){
+  const h=S.aqForecast;
+  if(!h)return'<div class="nodata">No air quality forecast</div>';
+  const now=new Date();
+  let html='',count=0;
+  (h.time||[]).forEach((t,i)=>{
+    if(count>=24)return;
+    if(new Date(t)<now)return;
+    const dt=new Date(t);
+    const label=dt.toLocaleTimeString('en-US',{hour:'numeric',hour12:true}).replace(' ','');
+    const pm25=h.pm2_5?.[i]??0;
+    const col=omAQCol(pm25);
+    html+=`<div class="fd">
+      <div class="fdn">${label}</div>
+      <div class="fdi" style="font-size:11px;color:${col}">${Math.round(pm25)}</div>
+      <div class="fdp"><div class="fdpi" style="color:${col}">${omAQLabel(pm25)}</div></div>
+    </div>`;
+    count++;
+  });
+  return`<div class="frow hourly">${html||'<div class="nodata">No data</div>'}</div>`;
+}
+
+// ════════════════════════════════
+//  RENDER AQ (current card)
+// ════════════════════════════════
 function renderAQ(data){
   S.aq=data;
   const top=data.reduce((a,b)=>b.AQI>a.AQI?b:a);
@@ -894,66 +1067,76 @@ function renderAQ(data){
   setInner('aq-body',html); setInner('m-aq-body',html);
   setBadge('aq-badge',badgeCls,badgeTxt); setBadge('m-aq-badge',badgeCls,badgeTxt);
   setTxt('aq-ts',ts); setTxt('m-aq-ts',ts);
-  ldrHide('aq'); ldrHideM('aq');
-  document.getElementById('nd-aq')?.classList.toggle('on',aqi>150);
+  ldrHide('aq');
 }
-const aqCat=v=>v<=50?'Good':v<=100?'Moderate':v<=150?'Unhealthy for Sensitive Groups':v<=200?'Unhealthy':v<=300?'Very Unhealthy':'Hazardous';
-const aqCol=v=>v<=50?'var(--good)':v<=100?'#9a9a20':v<=150?'var(--warn)':v<=200?'var(--bad)':v<=300?'#8f3f97':'#7e0023';
 
-// ════════════════════════════════════
-//  RENDER POLLEN
-// ════════════════════════════════════
+// ════════════════════════════════
+//  RENDER POLLEN (current card)
+// ════════════════════════════════
 function renderPollen(data,source){
   S.pollen=data;
   let types=[];
-
   if(source==='openmeteo'){
-    // Open-Meteo returns hourly arrays — take first non-null value of each
     const h=data.hourly;
-    const pick=arr=>{for(let i=0;i<(arr||[]).length;i++){if(arr[i]!=null)return arr[i];}return 0;};
+    const pick=arr=>{for(let i=0;i<(arr||[]).length;i++){if(arr[i]!=null&&arr[i]>0)return arr[i];}return 0;};
     const grass=pick(h.grass_pollen),tree=pick(h.tree_pollen),weed=pick(h.weed_pollen);
-    // Open-Meteo units are grains/m³ — map to 0–4 scale
-    const scale=v=>v<=0?0:v<=10?1:v<=50?2:v<=200?3:4;
-    const cats=['None','Very Low','Low','Moderate','High','Very High'];
     types=[
-      {name:'Grass',idx:scale(grass),cat:cats[scale(grass)],raw:Math.round(grass)+' gr/m³'},
-      {name:'Tree', idx:scale(tree), cat:cats[scale(tree)], raw:Math.round(tree)+' gr/m³'},
-      {name:'Weed', idx:scale(weed), cat:cats[scale(weed)], raw:Math.round(weed)+' gr/m³'},
+      {name:'Grass',idx:omPolScale(grass),cat:polCatName(omPolScale(grass)),raw:Math.round(grass)+' gr/m³'},
+      {name:'Tree', idx:omPolScale(tree), cat:polCatName(omPolScale(tree)), raw:Math.round(tree)+' gr/m³'},
+      {name:'Weed', idx:omPolScale(weed), cat:polCatName(omPolScale(weed)), raw:Math.round(weed)+' gr/m³'},
     ];
-  } else if(source==='google'){
+  }else if(source==='google'){
     const day=(data.dailyInfo||[])[0]||{};
     types=(day.pollenTypeInfo||[]).map(t=>({name:t.displayName||t.code,idx:t.indexInfo?.value??0,cat:t.indexInfo?.category||''}));
     types=types.concat((day.plantInfo||[]).map(p=>({name:p.displayName||p.code,idx:p.indexInfo?.value??0,cat:p.indexInfo?.category||''})));
-  } else {
-    // Custom URL: expect [{name,index,category}] or similar
-    if(Array.isArray(data)) types=data.map(t=>({name:t.name||t.Name,idx:Number(t.index||t.idx||0),cat:t.category||t.cat||''}));
+    // Store daily for forecast
+    if(!S.pollenForecast && data.dailyInfo?.length>1){
+      // Build synthetic hourly-like structure from daily Google data
+      S.pollenForecast=buildGooglePollenForecast(data.dailyInfo);
+    }
+  }else{
+    if(Array.isArray(data))types=data.map(t=>({name:t.name||t.Name,idx:Number(t.index||t.idx||0),cat:t.category||t.cat||''}));
   }
-
   if(!types.length){showCardErr('poll','No pollen data for this location');return;}
-  S.pollenTypes=types; // cache for captureCond
-  const hasH=types.some(t=>t.idx>=4),hasM=types.some(t=>t.idx>=3);
+  S.pollenTypes=types;
+  const hasH=types.some(t=>t.idx>=4),hasM=types.some(t=>t.idx>=2);
   const badgeCls=hasH?'badge bb':hasM?'badge bw':'badge bg';
-  const badgeTxt=hasH?'High':hasM?'Moderate':'Low';
+  const badgeTxt=hasH?'High':hasM?'Elevated':'Low';
   const rows=types.map(t=>{
     const pct=Math.min(100,(t.idx/4)*100);
     const lv=Math.min(4,Math.max(0,t.idx));
-    const display=t.raw?`${t.cat} (${t.raw})`:t.cat;
-    return`<div class="prow"><span class="pname">${t.name}</span><div class="ptrack"><div class="pfill l${lv}" style="width:${pct}%"></div></div><span class="pcat">${display}</span></div>`;
+    return`<div class="prow"><span class="pname">${t.name}</span><div class="ptrack"><div class="pfill l${lv}" style="width:${pct}%"></div></div><span class="pcat">${t.raw?t.cat+' ('+t.raw+')':t.cat}</span></div>`;
   }).join('');
   const ts='Updated '+new Date().toLocaleTimeString();
   setInner('poll-body',rows); setInner('m-poll-body',rows);
   setBadge('poll-badge',badgeCls,badgeTxt); setBadge('m-poll-badge',badgeCls,badgeTxt);
   setTxt('poll-ts',ts); setTxt('m-poll-ts',ts);
-  ldrHide('poll'); ldrHideM('poll');
-  document.getElementById('nd-poll')?.classList.toggle('on',hasH);
+  ldrHide('poll');
+  renderAlerts(); // refresh now that pollen is loaded
+  renderFcastTab();
 }
 
-// ════════════════════════════════════
+// Convert Google daily pollen to hourly-like structure for forecast tabs
+function buildGooglePollenForecast(dailyInfo){
+  const time=[],grass=[],tree=[],weed=[];
+  dailyInfo.forEach(day=>{
+    const date=`${day.date.year}-${String(day.date.month).padStart(2,'0')}-${String(day.date.day).padStart(2,'0')}`;
+    // Use noon as representative time
+    time.push(date+'T12:00');
+    const types=day.pollenTypeInfo||[];
+    const get=name=>{const t=types.find(x=>(x.displayName||x.code||'').toLowerCase().includes(name));return(t?.indexInfo?.value??0)*50;};
+    grass.push(get('grass')); tree.push(get('tree')); weed.push(get('weed'));
+  });
+  return{time,grass_pollen:grass,tree_pollen:tree,weed_pollen:weed};
+}
+
+// ════════════════════════════════
 //  LOG
-// ════════════════════════════════════
+// ════════════════════════════════
 function renderLog(){
   buildLogUI('log-body-d','erow-d','lnote-d','lbtn-d','lok-d','llist-d');
   buildLogUI('log-body-m','erow-m','lnote-m','lbtn-m','lok-m','llist-m');
+  buildLogUI('log-body-ml','erow-ml','lnote-ml','lbtn-ml','lok-ml','llist-ml');
 }
 
 function buildLogUI(bodyId,erId,noteId,btnId,okId,listId){
@@ -983,9 +1166,8 @@ function doLog(noteId,btnId,okId){
   const ni=document.getElementById(noteId); if(ni)ni.value='';
   const b=document.getElementById(btnId),ok=document.getElementById(okId);
   if(b&&ok){b.style.display='none';ok.style.display='block';setTimeout(()=>{b.style.display='';ok.style.display='none';},1800);}
-  // Re-render all lists and sync emoji pickers
-  renderList('llist-d'); renderList('llist-m');
-  buildEmojiPicker('erow-d',S.selEmojis); buildEmojiPicker('erow-m',S.selEmojis);
+  renderList('llist-d'); renderList('llist-m'); renderList('llist-ml');
+  buildEmojiPicker('erow-d',S.selEmojis); buildEmojiPicker('erow-m',S.selEmojis); buildEmojiPicker('erow-ml',S.selEmojis);
 }
 
 function renderList(listId){
@@ -997,11 +1179,7 @@ function renderList(listId){
     const ts=dt.toLocaleString('en-US',{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'});
     const noteHtml=e.note?`<span class="lenote">${esc(e.note)}</span>`:'';
     return`<div class="le" data-id="${e.id}">
-      <div class="letop">
-        <span class="leems">${(e.emojis||[]).join('')}</span>
-        ${noteHtml}
-        <span class="lets">${ts}</span>
-      </div>
+      <div class="letop"><span class="leems">${(e.emojis||[]).join('')}</span>${noteHtml}<span class="lets">${ts}</span></div>
       <div class="lechips">${condChips(e.cond)}</div>
       <div class="leact">
         <button class="abtn" data-a="edit" data-id="${e.id}">Edit</button>
@@ -1009,22 +1187,17 @@ function renderList(listId){
       </div>
     </div>`;
   }).join('');
-  // Wire action buttons directly — no expand needed
   el.querySelectorAll('[data-a]').forEach(b=>{
     b.addEventListener('click',ev=>{
-      ev.preventDefault(); ev.stopPropagation();
-      if(b.dataset.a==='edit')openEdit(b.dataset.id);
-      else delLog(b.dataset.id);
+      ev.preventDefault();ev.stopPropagation();
+      if(b.dataset.a==='edit')openEdit(b.dataset.id); else delLog(b.dataset.id);
     });
   });
 }
 
 function buildEmojiPicker(id,selSet){
   const el=document.getElementById(id); if(!el)return;
-  el.innerHTML=EMOJIS.map(({e,l})=>
-    `<button class="ebtn${selSet.has(e)?' sel':''}" data-e="${e}" title="${l}">` +
-    `<span class="ei">${e}</span><span class="el">${l}</span></button>`
-  ).join('');
+  el.innerHTML=EMOJIS.map(({e,l})=>`<button class="ebtn${selSet.has(e)?' sel':''}" data-e="${e}" title="${l}"><span class="ei">${e}</span><span class="el">${l}</span></button>`).join('');
   el.querySelectorAll('.ebtn').forEach(b=>b.addEventListener('click',()=>{
     const em=b.dataset.e;
     if(selSet.has(em))selSet.delete(em); else selSet.add(em);
@@ -1032,94 +1205,64 @@ function buildEmojiPicker(id,selSet){
   }));
 }
 
+function captureCond(){
+  const c={};
+  if(S.weather){
+    const w=S.weather;
+    c.tempF    = w.tempF!=null?+w.tempF.toFixed(1):null;
+    c.tempC    = w.tempC!=null?+w.tempC.toFixed(1):null;
+    c.feelsLikeF= w.feelsF!=null?+w.feelsF.toFixed(1):null;
+    c.feelsLikeC= w.feelsC!=null?+w.feelsC.toFixed(1):null;
+    c.humidity  = w.humidity??null;
+    c.windMph   = w.windMph??null;
+    c.windDir   = w.windDir??null;
+    c.pressureHpa=w.pressHpa??null;
+    c.visibilityM=w.visM??null;
+    c.uv        = w.uv??null;
+    c.uvLabel   = uvLabel(w.uv);
+    c.dewPointC = w.dewC??null;
+    c.dewPointF = w.dewC!=null?+(w.dewC*9/5+32).toFixed(1):null;
+    c.weatherDesc=w.desc??null;
+    c.isDaytime = w.isDaytime??null;
+    c.obsTime   = w.startTime??new Date().toISOString();
+  }
+  if(S.aq?.length){
+    const top=S.aq.reduce((a,b)=>b.AQI>a.AQI?b:a);
+    c.aqiOverall =top.AQI;
+    c.aqiCategory=top.Category?.Name??null;
+    c.pollutants =S.aq.map(o=>({name:o.ParameterName,aqi:o.AQI,cat:o.Category?.Name??null}));
+  }
+  if(S.pollenTypes?.length){
+    c.pollen=S.pollenTypes.map(t=>({name:t.name,index:t.idx,category:t.cat,raw:t.raw??null}));
+  }
+  return c;
+}
+
 function condChips(c){
   if(!c)return'';
   const ch=[];
-  // Temperature
   if(c.tempF!=null||c.tempC!=null){
-    const disp=S.useFahrenheit
-      ? (c.tempF!=null ? Math.round(c.tempF)+'°F' : Math.round(c.tempC*9/5+32)+'°F')
-      : (c.tempC!=null ? Math.round(c.tempC)+'°C'  : Math.round((c.tempF-32)*5/9)+'°C');
-    ch.push('&#127777;'+disp);
+    const d=S.useFahrenheit?(c.tempF!=null?Math.round(c.tempF)+'°F':Math.round(c.tempC*9/5+32)+'°F'):(c.tempC!=null?Math.round(c.tempC)+'°C':Math.round((c.tempF-32)*5/9)+'°C');
+    ch.push('&#127777;'+d);
   }
-  if(c.humidity!=null)   ch.push(c.humidity+'% RH');
-  if(c.windMph!=null)    ch.push('&#128168;'+Math.round(c.windMph)+' mph');
-  if(c.uv!=null)         ch.push('UV '+c.uv+(c.uvLabel?' '+c.uvLabel:''));
-  if(c.aqiOverall!=null) ch.push('AQI '+c.aqiOverall+(c.aqiCategory?' · '+c.aqiCategory:''));
-  if(c.pollen?.length){
-    const worst=c.pollen.reduce((a,b)=>b.index>a.index?b:a);
-    if(worst.index>0) ch.push('&#127807; '+worst.name+' '+worst.category);
-  }
-  if(c.weatherDesc)      ch.push(c.weatherDesc);
+  if(c.humidity!=null)    ch.push(c.humidity+'% RH');
+  if(c.windMph!=null)     ch.push('&#128168;'+Math.round(c.windMph)+' mph');
+  if(c.uv!=null)          ch.push('UV '+c.uv+(c.uvLabel?' '+c.uvLabel:''));
+  if(c.aqiOverall!=null)  ch.push('AQI '+c.aqiOverall+(c.aqiCategory?' \u00b7 '+c.aqiCategory:''));
+  if(c.pollen?.length){const w=c.pollen.reduce((a,b)=>b.index>a.index?b:a);if(w.index>0)ch.push('&#127807; '+w.name+' '+w.category);}
+  if(c.weatherDesc)       ch.push(c.weatherDesc);
   return ch.map(t=>`<span class="lechip">${t}</span>`).join('');
-}
-
-function captureCond(){
-  const c={};
-
-  // ── Weather (NWS) ──
-  if(S.weather){
-    const w=S.weather;
-    c.tempF        = w.tempF   ?? (w.temperature_2m!=null ? +(w.temperature_2m*9/5+32).toFixed(1) : null);
-    c.tempC        = w.tempC   != null ? +w.tempC.toFixed(1) : (w.temperature_2m!=null ? +w.temperature_2m.toFixed(1) : null);
-    c.feelsLikeF   = w.feelsF  ?? null;
-    c.feelsLikeC   = w.feelsC  ?? null;
-    c.humidity     = w.humidity ?? w.relative_humidity_2m ?? null;
-    c.windMph      = w.windMph  ?? w.wind_speed_10m ?? null;
-    c.windDir      = w.windDir  ?? null;
-    c.pressureHpa  = w.pressHpa ?? null;
-    c.visibilityM  = w.visM     ?? null;
-    c.uv           = w.uv       ?? w.uv_index ?? null;
-    c.uvLabel      = c.uv!=null ? (c.uv<=2?'Low':c.uv<=5?'Moderate':c.uv<=7?'High':c.uv<=10?'Very High':'Extreme') : null;
-    c.dewPointC    = w.dewC     ?? null;
-    c.dewPointF    = c.dewPointC!=null ? +(c.dewPointC*9/5+32).toFixed(1) : null;
-    c.weatherDesc  = w.desc     ?? (w.weather_code!=null ? wDesc(w.weather_code) : null);
-    c.isDaytime    = w.isDaytime ?? null;
-    c.obsTime      = w.startTime ?? new Date().toISOString();
-  }
-
-  // ── Air Quality (AirNow) ──
-  if(S.aq?.length){
-    const top=S.aq.reduce((a,b)=>b.AQI>a.AQI?b:a);
-    c.aqiOverall   = top.AQI;
-    c.aqiCategory  = top.Category?.Name ?? null;
-    // All individual pollutants
-    c.pollutants   = S.aq.map(o=>({
-      name: o.ParameterName,
-      aqi:  o.AQI,
-      cat:  o.Category?.Name ?? null,
-    }));
-  }
-
-  // ── Pollen (Open-Meteo or Google) ──
-  if(S.pollen){
-    // Store raw pollen state reference — types array reconstructed from last render
-    // We store the parsed types array on S.pollenTypes during renderPollen
-    if(S.pollenTypes?.length){
-      c.pollen = S.pollenTypes.map(t=>({
-        name:     t.name,
-        index:    t.idx,
-        category: t.cat,
-        raw:      t.raw ?? null,
-      }));
-    }
-  }
-
-  return c;
 }
 
 function delLog(id){
   if(!confirm('Delete this entry?'))return;
-  S.logs=S.logs.filter(e=>e.id!==id);
-  saveLogs();
-  renderList('llist-d'); renderList('llist-m');
+  S.logs=S.logs.filter(e=>e.id!==id); saveLogs();
+  renderList('llist-d'); renderList('llist-m'); renderList('llist-ml');
 }
-
 function openEdit(id){
   const e=S.logs.find(x=>x.id===id); if(!e)return;
   S.editId=id;
-  const sel=new Set(e.emojis||[]);
-  buildEmojiPicker('edit-erow',sel);
+  buildEmojiPicker('edit-erow',new Set(e.emojis||[]));
   document.getElementById('edit-note').value=e.note||'';
   document.getElementById('edit-modal').classList.add('on');
 }
@@ -1128,50 +1271,55 @@ function saveEdit(){
   const sel=new Set();
   document.querySelectorAll('#edit-erow .ebtn.sel').forEach(b=>sel.add(b.dataset.e));
   e.emojis=[...sel]; e.note=document.getElementById('edit-note').value.trim();
-  saveLogs(); renderList('llist-d'); renderList('llist-m');
+  saveLogs(); renderList('llist-d'); renderList('llist-m'); renderList('llist-ml');
   document.getElementById('edit-modal').classList.remove('on');
 }
-
 function exportLogs(){
   const blob=new Blob([JSON.stringify(S.logs,null,2)],{type:'application/json'});
-  const a=document.createElement('a');
-  a.href=URL.createObjectURL(blob);
+  const a=document.createElement('a'); a.href=URL.createObjectURL(blob);
   a.download='atmosphere-log-'+new Date().toISOString().slice(0,10)+'.json';
   document.body.appendChild(a); a.click(); document.body.removeChild(a);
 }
 
-// ════════════════════════════════════
+// ════════════════════════════════
+//  FORECAST TABS WIRING
+// ════════════════════════════════
+function wireTabGroup(containerId){
+  const c=document.getElementById(containerId); if(!c)return;
+  c.querySelectorAll('.ftab').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      S.fcastTab=btn.dataset.tab;
+      // Update all tab groups (desktop + mobile stay in sync)
+      document.querySelectorAll('.ftab').forEach(t=>t.classList.toggle('on',t.dataset.tab===S.fcastTab));
+      renderFcastTab();
+    });
+  });
+}
+
+// ════════════════════════════════
 //  MOBILE NAV
-// ════════════════════════════════════
-const PANELS={cur:'mp-cur',fcast:'mp-fcast',poll:'mp-poll',aq:'mp-aq',log:'mp-log'};
+// ════════════════════════════════
+const PANELS={now:'mp-now',fcast:'mp-fcast',log:'mp-log'};
 function switchSec(sec){
   Object.keys(PANELS).forEach(k=>document.getElementById(PANELS[k]).classList.toggle('off',k!==sec));
   document.querySelectorAll('.nb').forEach(b=>b.classList.toggle('on',b.dataset.sec===sec));
 }
 
-// ════════════════════════════════════
-//  HELPERS
-// ════════════════════════════════════
-const setInner=(id,h)=>{const e=document.getElementById(id);if(e)e.innerHTML=h;};
-const setTxt=(id,v)=>{const e=document.getElementById(id);if(e)e.textContent=v;};
-const setBadge=(id,cls,txt)=>{const e=document.getElementById(id);if(e){e.className=cls;e.textContent=txt;}};
-const esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-
-// ════════════════════════════════════
+// ════════════════════════════════
 //  UNIT TOGGLE
-// ════════════════════════════════════
+// ════════════════════════════════
 function toggleUnit(){
   S.useFahrenheit=!S.useFahrenheit;
   localStorage.setItem('atmo_u',S.useFahrenheit?'F':'C');
   const lbl=S.useFahrenheit?'°F':'°C';
   setTxt('unit-tog',lbl); setTxt('m-unit-tog',lbl);
-  if(S.weather)renderWeather({current:S.weather});
-  if(S.forecast)renderForecast(S.forecast);
+  if(S.weather)renderWeather(S.weather);
+  renderFcastTab();
 }
 
-// ════════════════════════════════════
+// ════════════════════════════════
 //  GEOCODING
-// ════════════════════════════════════
+// ════════════════════════════════
 async function geoZip(z){
   const r=await fetch(`https://api.zippopotam.us/us/${encodeURIComponent(z)}`);
   if(!r.ok)throw new Error('ZIP not found. Try City, State.');
@@ -1200,14 +1348,12 @@ function parseLL(s){
   return(la>=-90&&la<=90&&lo>=-180&&lo<=180)?{lat:la,lng:lo}:null;
 }
 
-// ════════════════════════════════════
+// ════════════════════════════════
 //  LOCATION MODAL
-// ════════════════════════════════════
+// ════════════════════════════════
 function openLocModal(){document.getElementById('loc-modal').classList.add('on');}
-
 document.getElementById('loc-btn').addEventListener('click',openLocModal);
 document.getElementById('loc-cancel').addEventListener('click',()=>document.getElementById('loc-modal').classList.remove('on'));
-
 document.getElementById('gps-btn').addEventListener('click',()=>{
   const st=document.getElementById('gps-stat'),pb=document.getElementById('perm-box');
   pb.classList.remove('on');st.style.color='var(--tx3)';st.textContent='Requesting location…';
@@ -1223,13 +1369,12 @@ document.getElementById('gps-btn').addEventListener('click',()=>{
     err=>{
       st.style.color='var(--bad)';
       if(err.code===1){st.textContent='Permission denied.';pb.classList.add('on');}
-      else if(err.code===2)st.textContent='Position unavailable. Try manual entry.';
-      else st.textContent='Timed out. Try manual entry.';
+      else if(err.code===2)st.textContent='Position unavailable. Use manual entry.';
+      else st.textContent='Timed out. Use manual entry.';
     },
     {timeout:12000,enableHighAccuracy:true}
   );
 });
-
 document.getElementById('loc-save').addEventListener('click',async()=>{
   const zip=document.getElementById('loc-zip').value.trim();
   const city=document.getElementById('loc-city').value.trim();
@@ -1244,15 +1389,14 @@ document.getElementById('loc-save').addEventListener('click',async()=>{
     else throw new Error('Enter a ZIP, city, or lat/lng.');
     S.lat=r.lat;S.lng=r.lng;S.locName=r.name;
     saveLoc();setTxt('loc-lbl',S.locName);
-    document.getElementById('loc-modal').classList.remove('on');
-    loadAll();
+    document.getElementById('loc-modal').classList.remove('on');loadAll();
   }catch(e){alert('Location error:\n'+e.message);}
   finally{btn.textContent='Save';btn.disabled=false;}
 });
 
-// ════════════════════════════════════
+// ════════════════════════════════
 //  SETTINGS MODAL
-// ════════════════════════════════════
+// ════════════════════════════════
 document.getElementById('settings-btn').addEventListener('click',()=>{
   document.getElementById('set-airnow').value=S.keys.airnow;
   document.getElementById('set-pollen').value=S.keys.pollen;
@@ -1265,22 +1409,13 @@ document.getElementById('set-save').addEventListener('click',()=>{
   saveKeys();document.getElementById('set-modal').classList.remove('on');loadAll();
 });
 
-// ════════════════════════════════════
-//  EDIT / EXPORT
-// ════════════════════════════════════
-document.getElementById('edit-cancel').addEventListener('click',()=>document.getElementById('edit-modal').classList.remove('on'));
-document.getElementById('edit-save').addEventListener('click',saveEdit);
-document.getElementById('export-btn').addEventListener('click',exportLogs);
-document.getElementById('m-export-btn').addEventListener('click',exportLogs);
-
-// ════════════════════════════════════
+// ════════════════════════════════
 //  GLOBAL WIRING
-// ════════════════════════════════════
-document.getElementById('logo-home').addEventListener('click',()=>switchSec('cur'));
+// ════════════════════════════════
+document.getElementById('logo-home').addEventListener('click',()=>switchSec('now'));
 document.getElementById('refresh-btn').addEventListener('click',()=>{
   const b=document.getElementById('refresh-btn');
   b.style.animation='rot .7s linear infinite';
-  // Re-show loaders
   ldrShow('cur');ldrShow('fcast');ldrShow('poll');ldrShow('aq');
   ldrShow('mcur');ldrShow('mfcast');ldrShow('mpoll');ldrShow('maq');
   fetchWeather();fetchForecast();fetchAQ();fetchPollen();
@@ -1288,24 +1423,26 @@ document.getElementById('refresh-btn').addEventListener('click',()=>{
 });
 document.getElementById('unit-tog').addEventListener('click',toggleUnit);
 document.getElementById('m-unit-tog').addEventListener('click',toggleUnit);
+document.getElementById('export-btn').addEventListener('click',exportLogs);
+document.getElementById('m-export-btn').addEventListener('click',exportLogs);
+document.getElementById('ml-export-btn').addEventListener('click',exportLogs);
+document.getElementById('edit-cancel').addEventListener('click',()=>document.getElementById('edit-modal').classList.remove('on'));
+document.getElementById('edit-save').addEventListener('click',saveEdit);
 document.querySelectorAll('.nb').forEach(b=>b.addEventListener('click',()=>switchSec(b.dataset.sec)));
 document.querySelectorAll('.ov').forEach(o=>o.addEventListener('click',e=>{if(e.target===o)o.classList.remove('on');}));
+wireTabGroup('ftabs-d');
+wireTabGroup('ftabs-m');
 setInterval(()=>{if(S.lat&&S.lng)loadAll();},15*60*1000);
 
-// ════════════════════════════════════
+// ════════════════════════════════
 //  INIT
-// ════════════════════════════════════
+// ════════════════════════════════
 loadStore();
 setTxt('unit-tog',S.useFahrenheit?'°F':'°C');
 setTxt('m-unit-tog',S.useFahrenheit?'°F':'°C');
 if(S.locName)setTxt('loc-lbl',S.locName);
 renderLog();
-if(S.lat&&S.lng){
-  loadAll();
-}else{
-  showSetup();
-  setTimeout(openLocModal,400);
-}
+if(S.lat&&S.lng){loadAll();}else{showSetup();setTimeout(openLocModal,400);}
 </script>
 </body>
 </html>
