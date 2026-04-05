@@ -52,10 +52,7 @@ main{flex:1;padding:14px 14px calc(var(--navh) + env(safe-area-inset-bottom) + 8
   .dgrid{grid-template-columns:1fr 1fr}
   .gcol-log{grid-column:1/-1}
 }
-@media(max-width:700px){
-  .dgrid{display:none}
-  .bnav{display:flex}
-}
+
 
 /* CARD */
 .card{background:var(--sf);border:1px solid var(--bdr);border-radius:var(--r);padding:16px;box-shadow:var(--sh);position:relative;overflow:hidden}
@@ -199,6 +196,8 @@ main{flex:1;padding:14px 14px calc(var(--navh) + env(safe-area-inset-bottom) + 8
 .mpanel{display:none}
 @media(max-width:700px){
   main{padding:12px 12px calc(var(--navh) + env(safe-area-inset-bottom) + 4px)}
+  .dgrid{display:none}
+  .bnav{display:flex}
   .mpanel{display:block}
   .mpanel.off{display:none}
   .mpanel .card+.card{margin-top:13px}
@@ -234,7 +233,7 @@ main{flex:1;padding:14px 14px calc(var(--navh) + env(safe-area-inset-bottom) + 8
 
 
 /* COLLAPSIBLE CARDS (mobile) */
-.collapsible .card-hdr{cursor:pointer;user-select:none;-webkit-user-select:none}
+.collapsible .card-hdr{cursor:pointer;user-select:none;-webkit-user-select:none;position:relative;z-index:11}
 .collapsible .card-hdr::after{content:'\25BE';font-size:11px;color:var(--tx3);margin-left:6px;display:inline-block;transition:transform .2s}
 .collapsible.collapsed .card-hdr::after{transform:rotate(-90deg)}
 .collapsible .card-body{overflow:hidden;transition:max-height .35s ease,opacity .25s ease;max-height:800px;opacity:1}
@@ -243,8 +242,8 @@ main{flex:1;padding:14px 14px calc(var(--navh) + env(safe-area-inset-bottom) + 8
 
 /* COMBINED FORECAST CELLS */
 .frow-daily {grid-template-columns:repeat(7,minmax(72px,1fr))}
-.frow-hourly{grid-template-columns:repeat(24,minmax(58px,1fr))}
-.fd-combined{padding:0;overflow:hidden;display:flex;flex-direction:column}
+.frow-hourly{grid-template-columns:repeat(24,minmax(58px,1fr));overflow-x:auto}
+.fd-combined{padding:0;overflow:hidden;display:flex;flex-direction:column;min-width:0}
 .fd-section{padding:6px 4px;text-align:center}
 .fd-wx{border-bottom:1px solid var(--bdr)}
 .fd-poll{border-bottom:1px solid var(--bdr);background:rgba(42,156,90,.04)}
@@ -352,6 +351,13 @@ main{flex:1;padding:14px 14px calc(var(--navh) + env(safe-area-inset-bottom) + 8
   <div class="card">
     <div class="card-hdr"><span class="ctitle">Environmental Alerts</span><span class="badge" id="m-alerts-badge">—</span></div>
     <div id="m-alerts-body"><div class="nodata">Waiting for data…</div></div>
+  </div>
+  <div class="card">
+    <div class="card-hdr">
+      <span class="ctitle">How I Feel</span>
+      <button class="hbtn" id="m-export-btn" style="font-size:10px;padding:4px 9px">&#8595; Export</button>
+    </div>
+    <div id="log-body-m"></div>
   </div>
   <div class="card collapsible collapsed" id="mob-poll-card">
     <div class="ldr" id="ldr-mpoll"><div class="spin"></div><div class="ldr-msg">Loading pollen…</div></div>
@@ -1364,11 +1370,11 @@ document.getElementById('refresh-btn').addEventListener('click',()=>{
 });
 document.getElementById('unit-tog').addEventListener('click',toggleUnit);
 document.getElementById('m-unit-tog').addEventListener('click',toggleUnit);
-document.getElementById('export-btn').addEventListener('click',exportLogs);
-document.getElementById('m-export-btn').addEventListener('click',exportLogs);
-document.getElementById('ml-export-btn').addEventListener('click',exportLogs);
-document.getElementById('edit-cancel').addEventListener('click',()=>document.getElementById('edit-modal').classList.remove('on'));
-document.getElementById('edit-save').addEventListener('click',saveEdit);
+[['export-btn',exportLogs],['m-export-btn',exportLogs],['ml-export-btn',exportLogs],
+ ['edit-cancel',()=>document.getElementById('edit-modal').classList.remove('on')],
+ ['edit-save',saveEdit]].forEach(([id,fn])=>{
+  const el=document.getElementById(id); if(el) el.addEventListener('click',fn);
+});
 document.querySelectorAll('.nb').forEach(b=>b.addEventListener('click',()=>switchSec(b.dataset.sec)));
 document.querySelectorAll('.ov').forEach(o=>o.addEventListener('click',e=>{if(e.target===o)o.classList.remove('on');}));
 wireTabGroup('ftabs-d');
