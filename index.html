@@ -674,51 +674,138 @@ function nwsIcon(desc,day){
 // ═══════════════════════════════
 //  AIR QUALITY
 // ═══════════════════════════════
+
+// Attempt a fetch with a timeout (ms). Rejects on timeout or non-ok status.
+async function fetchWithTimeout(url, ms, opts){
+  const ctrl=new AbortController();
+  const timer=setTimeout(()=>ctrl.abort(),ms);
+  try{
+    const r=await fetch(url,{...(opts||{}),signal:ctrl.signal});
+    clearTimeout(timer);
+    if(!r.ok)throw new Error('HTTP '+r.status);
+    return r;
+  }catch(e){clearTimeout(timer);throw e;}
+}
+
+// Convert Open-Meteo current AQ snapshot into AirNow-compatible array
+// so renderAQ works without any changes.
+function omAQToAirNow(cur){
+  const map=[
+    {param:'PM2.5', val:cur.pm2_5},
+    {param:'PM10',  val:cur.pm10},
+    {param:'Ozone', val:cur.ozone},
+    {param:'NO2',   val:cur.nitrogen_dioxide},
+  ];
+  return map
+    .filter(m=>m.val!=null)
+    .map(m=>{
+      // Rough μg/m³ → AQI approximation for display (EPA linear interpolation simplified)
+      const aqi=omPollutantToAQI(m.param,m.val);
+      return{
+        ParameterName:m.param,
+        AQI:aqi,
+        Category:{Name:aqCat(aqi)},
+        _source:'Open-Meteo',
+        _raw:Math.round(m.val)+omPollutantUnit(m.param),
+      };
+    });
+}
+function omPollutantUnit(p){
+  return p==='Ozone'||p==='NO2'?' μg/m³':' μg/m³';
+}
+function omPollutantToAQI(param,val){
+  // Simplified breakpoints (EPA NowCast approximation)
+  const bp={
+    'PM2.5':[[0,12,0,50],[12.1,35.4,51,100],[35.5,55.4,101,150],[55.5,150.4,151,200],[150.5,250.4,201,300],[250.5,350.4,301,400],[350.5,500.4,401,500]],
+    'PM10': [[0,54,0,50],[55,154,51,100],[155,254,101,150],[255,354,151,200],[355,424,201,300],[425,504,301,400],[505,604,401,500]],
+    'Ozone':[[0,54,0,50],[55,70,51,100],[71,85,101,150],[86,105,151,200],[106,200,201,300]],
+    'NO2':  [[0,53,0,50],[54,100,51,100],[101,360,101,150],[361,649,151,200],[650,1249,201,300],[1250,1649,301,400],[1650,2049,401,500]],
+  };
+  const breaks=bp[param];
+  if(!breaks)return Math.round(val);
+  for(const[clo,chi,ilo,ihi]of breaks){
+    if(val>=clo&&val<=chi){
+      return Math.round(((ihi-ilo)/(chi-clo))*(val-clo)+ilo);
+    }
+  }
+  return Math.min(500,Math.round(val));
+}
+
 async function fetchAQ(){
   const{lat,lng}=S;
   if(!S.keys.airnow){
-    diagSet('aq','err','Add AirNow key in Settings ⚙');
-    showCardErr('aq','Add AirNow key in Settings ⚙');
+    diagSet('aq','err','No AirNow key — using Open-Meteo fallback');
+    await fetchAQFromOpenMeteo();
     fetchAQForecast();
     return;
   }
-  diagSet('aq','loading','Fetching…');
-  // Try direct first (works from HTTPS/GitHub Pages), fall back to proxy
+  diagSet('aq','loading','Fetching AirNow…');
   const direct=`https://www.airnowapi.org/aq/observation/latLong/current/?format=application/json&latitude=${lat}&longitude=${lng}&distance=25&API_KEY=${S.keys.airnow}`;
+
+  // Try three routes in order, each with a 8s timeout
+  const proxies=[
+    // 1. allorigins /raw — returns raw body, proper CORS headers
+    ()=>fetchWithTimeout(`https://api.allorigins.win/raw?url=${encodeURIComponent(direct)}`,8000)
+          .then(r=>r.json()),
+    // 2. Direct (sometimes works depending on AirNow CORS config)
+    ()=>fetchWithTimeout(direct,8000).then(r=>r.json()),
+    // 3. corsproxy.io
+    ()=>fetchWithTimeout(`https://corsproxy.io/?url=${encodeURIComponent(direct)}`,8000)
+          .then(r=>r.json()),
+  ];
+
   let data=null;
-  try{
-    const r=await fetch(direct);
-    if(r.ok){
-      const d=await r.json();
-      if(Array.isArray(d))data=d;
-    }
-  }catch(e){console.warn('AirNow direct failed, trying proxy:',e.message);}
-  if(!data){
+  for(let i=0;i<proxies.length;i++){
     try{
-      const proxy=`https://corsproxy.io/?url=${encodeURIComponent(direct)}`;
-      const r=await fetch(proxy);
-      if(!r.ok)throw new Error('AirNow proxy HTTP '+r.status);
-      const d=await r.json();
-      if(!Array.isArray(d))throw new Error('Unexpected AirNow format');
-      data=d;
+      diagSet('aq','loading','Fetching AirNow (attempt '+(i+1)+')…');
+      const d=await proxies[i]();
+      if(Array.isArray(d)&&d.length>0){data=d;break;}
+      if(Array.isArray(d)&&d.length===0){
+        // Valid response, just no stations nearby — don't try more proxies
+        diagSet('aq','err','No AirNow observations within 25 mi');
+        showCardErr('aq','No AirNow observations within 25 mi — showing Open-Meteo AQ');
+        await fetchAQFromOpenMeteo();
+        fetchAQForecast();
+        return;
+      }
     }catch(e){
-      diagSet('aq','err',e.message);
-      showCardErr('aq','Air Quality: '+e.message);
-      fetchAQForecast();
-      return;
+      console.warn('AirNow attempt '+(i+1)+' failed:',e.message);
     }
   }
-  if(!data.length){
-    diagSet('aq','err','No observations within 25 mi');
-    showCardErr('aq','No AirNow observations within 25 mi');
+
+  if(!data){
+    diagSet('aq','err','AirNow unavailable — using Open-Meteo');
+    showCardErr('aq','AirNow unreachable — falling back to Open-Meteo');
+    await fetchAQFromOpenMeteo();
     fetchAQForecast();
     return;
   }
+
   S.aq=data;
   diagSet('aq','ok','AirNow ✓');
   renderAQ(data);
   renderAlerts();
   fetchAQForecast();
+}
+
+// Open-Meteo current AQ — used as fallback when AirNow is unreachable
+async function fetchAQFromOpenMeteo(){
+  const{lat,lng}=S;
+  try{
+    const d=await safeFetch(
+      `https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${lat}&longitude=${lng}`+
+      `&current=pm2_5,pm10,ozone,nitrogen_dioxide&timezone=auto`
+    );
+    const normalized=omAQToAirNow(d.current);
+    if(!normalized.length)throw new Error('No OM AQ data');
+    S.aq=normalized;
+    diagSet('aq','ok','Open-Meteo AQ ✓ (AirNow unavailable)');
+    renderAQ(normalized);
+    renderAlerts();
+  }catch(e){
+    diagSet('aq','err','AQ unavailable: '+e.message);
+    showCardErr('aq','Air quality unavailable: '+e.message);
+  }
 }
 
 async function fetchAQForecast(){
