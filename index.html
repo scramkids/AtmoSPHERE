@@ -5,8 +5,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>AtmoSPHERE</title>
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2032%2032%22%3E%3Crect%20width%3D%2232%22%20height%3D%2232%22%20rx%3D%228%22%20fill%3D%22%23c85a2a%22%2F%3E%3Ccircle%20cx%3D%2216%22%20cy%3D%2213%22%20r%3D%225%22%20fill%3D%22none%22%20stroke%3D%22%23faf8f4%22%20stroke-width%3D%222%22%2F%3E%3Cline%20x1%3D%2216%22%20y1%3D%225%22%20x2%3D%2216%22%20y2%3D%227%22%20stroke%3D%22%23faf8f4%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%2F%3E%3Cline%20x1%3D%2216%22%20y1%3D%2219%22%20x2%3D%2216%22%20y2%3D%2221%22%20stroke%3D%22%23faf8f4%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%2F%3E%3Cline%20x1%3D%228%22%20y1%3D%2213%22%20x2%3D%2210%22%20y2%3D%2213%22%20stroke%3D%22%23faf8f4%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%2F%3E%3Cline%20x1%3D%2222%22%20y1%3D%2213%22%20x2%3D%2224%22%20y2%3D%2213%22%20stroke%3D%22%23faf8f4%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%2F%3E%3Cline%20x1%3D%2210.3%22%20y1%3D%227.3%22%20x2%3D%2211.7%22%20y2%3D%228.7%22%20stroke%3D%22%23faf8f4%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%2F%3E%3Cline%20x1%3D%2220.3%22%20y1%3D%2217.3%22%20x2%3D%2221.7%22%20y2%3D%2218.7%22%20stroke%3D%22%23faf8f4%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%2F%3E%3Cline%20x1%3D%2221.7%22%20y1%3D%227.3%22%20x2%3D%2220.3%22%20y2%3D%228.7%22%20stroke%3D%22%23faf8f4%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%2F%3E%3Cline%20x1%3D%2211.7%22%20y1%3D%2217.3%22%20x2%3D%2210.3%22%20y2%3D%2218.7%22%20stroke%3D%22%23faf8f4%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%2F%3E%3Cpath%20d%3D%22M16%2021%20Q20%2024%2018%2028%20Q16%2030%2014%2028%20Q12%2024%2016%2021Z%22%20fill%3D%22%23faf8f4%22%20opacity%3D%220.85%22%2F%3E%3C%2Fsvg%3E">
-  <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2032%2032%22%3E%3Crect%20width%3D%2232%22%20height%3D%2232%22%20rx%3D%228%22%20fill%3D%22%23c85a2a%22%2F%3E%3Ccircle%20cx%3D%2216%22%20cy%3D%2213%22%20r%3D%225%22%20fill%3D%22none%22%20stroke%3D%22%23faf8f4%22%20stroke-width%3D%222%22%2F%3E%3Cline%20x1%3D%2216%22%20y1%3D%225%22%20x2%3D%2216%22%20y2%3D%227%22%20stroke%3D%22%23faf8f4%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%2F%3E%3Cline%20x1%3D%2216%22%20y1%3D%2219%22%20x2%3D%2216%22%20y2%3D%2221%22%20stroke%3D%22%23faf8f4%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%2F%3E%3Cline%20x1%3D%228%22%20y1%3D%2213%22%20x2%3D%2210%22%20y2%3D%2213%22%20stroke%3D%22%23faf8f4%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%2F%3E%3Cline%20x1%3D%2222%22%20y1%3D%2213%22%20x2%3D%2224%22%20y2%3D%2213%22%20stroke%3D%22%23faf8f4%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%2F%3E%3Cline%20x1%3D%2210.3%22%20y1%3D%227.3%22%20x2%3D%2211.7%22%20y2%3D%228.7%22%20stroke%3D%22%23faf8f4%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%2F%3E%3Cline%20x1%3D%2220.3%22%20y1%3D%2217.3%22%20x2%3D%2221.7%22%20y2%3D%2218.7%22%20stroke%3D%22%23faf8f4%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%2F%3E%3Cline%20x1%3D%2221.7%22%20y1%3D%227.3%22%20x2%3D%2220.3%22%20y2%3D%228.7%22%20stroke%3D%22%23faf8f4%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%2F%3E%3Cline%20x1%3D%2211.7%22%20y1%3D%2217.3%22%20x2%3D%2210.3%22%20y2%3D%2218.7%22%20stroke%3D%22%23faf8f4%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%2F%3E%3Cpath%20d%3D%22M16%2021%20Q20%2024%2018%2028%20Q16%2030%2014%2028%20Q12%2024%2016%2021Z%22%20fill%3D%22%23faf8f4%22%20opacity%3D%220.85%22%2F%3E%3C%2Fsvg%3E">
+  <link rel="apple-touch-icon" sizes="180x180" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAALQAAAC0CAIAAACyr5FlAAACx0lEQVR42u3dMVLDMBBAUZ2HI3FiDkTBUNFSiCDbkq3dfTO/xck4DxlLcmgf729St+YUCA7BITgEh+AQHIJDcAgOwSHBITgEh+AQHIJDcAgOwSE4JDgEh+AQHIJDcAgOwSE4BIcEh+AQHBf7/vp0EuDosPidEwIHHHAclMEHHHDAAQcccMABBxxwwAEHHHDAEXbaezqOHLZasl/6NMeBY8kV4cEPNdm1qeX7W+Hi7/0+bwaO7XyQkR/HuQ/m9E/Bkc3Hix+cchB3K/EuLoMmLh7NrWwwH6dZHD2gSbBgt7VTZIwc1gxpsDmxiTJeH9n0eaTZ9Oks/iJibSXPjcyKSwwcqXDccAQ44sl46lBwpJJR1kerJmPbI8ORYRkMDsOGwaMSDgv0cNy0WxgOw0bpwaMZNgwecMCRFMf4DcJuOELf2rS4LMaX5h/BkWDdDg44YuI4unR+8wdw4p3E8mHkMHLAAYe7FXcr5jnMc8ABBxzWVuCwKguH/Rxw2AkGh8HDHlKDh2HDcyueW4HDE29wXF6aueEIcGRY9PeUfZU/SO/x0X1FOGIMFeuI/PuKcOx+EVl0iRl/UTjCTHz5NsGKOHwPKRyTZy19g3FyHL77HI7dl8HgyC/D/1tJPnLMnSB55M3AsXbWK/px4FgyX77DhlC3svYkJw8OOOCAAw444IADDjjggAOOnDuQ4ai+9xgOMvgoj8NTCHAseZIFDjL4KIbDU25wwAHHczLq+IADDjjggAMOOOCAY1cZRXwYOcgwz2GeAw7T53DAAYdVWTjs54ADDjhsE4TDBmM44ICDDzLg8FATHHN8FD8zcMABx3EfTgscfR9OCBxwwHHQh1MBR9+HkwCH4BAcgkNwCA7BITgEh+CQ4BAcgkNwCA7BITgEh+AQHIJDgkNwCA7BITgEh+AQHIJDcEhwCA7BITgEh+AQHIJDcKhQP0K12DtzPVNCAAAAAElFTkSuQmCC">
   <meta name="theme-color" content="#c85a2a">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="AtmoSPHERE">
 <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Fraunces:ital,opsz,wght@0,9..144,200;0,9..144,400;0,9..144,600;1,9..144,300&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -33,7 +36,7 @@ html,body{height:100%;font-family:'DM Mono',monospace;background:var(--bg);color
 /* HEADER */
 header{display:flex;align-items:center;justify-content:space-between;padding:0 16px;height:52px;background:var(--sf);border-bottom:1px solid var(--bdr);position:sticky;top:0;z-index:100}
 .logo{font-family:'Fraunces',serif;font-size:21px;font-weight:200;letter-spacing:-.5px;cursor:pointer}
-.logo em{color:var(--ac);font-style:italic}
+.logo em{color:var(--ac);font-style:italic;text-transform:uppercase;letter-spacing:-.5px}
 .hdr-r{display:flex;align-items:center;gap:7px}
 .hbtn{display:flex;align-items:center;gap:5px;padding:5px 10px;background:var(--bg2);border:1px solid var(--bdr);border-radius:7px;font-family:'DM Mono',monospace;font-size:11px;color:var(--tx2);cursor:pointer}
 .hbtn:hover,.ibtn:hover{background:var(--bg3);color:var(--tx)}
@@ -249,7 +252,7 @@ main{flex:1;padding:14px 14px calc(var(--navh) + env(safe-area-inset-bottom) + 8
 <body>
 <div id="app">
 <header>
-  <div class="logo" id="logo-home">atmo<em>sphere</em></div>
+  <div class="logo" id="logo-home">Atmo<em>SPHERE</em></div>
   <div class="hdr-r">
     <button class="ibtn" id="refresh-btn" title="Refresh">&#8635;</button>
     <button class="hbtn" id="loc-btn">&#9711;&nbsp;<span id="loc-lbl">Set location</span></button>
@@ -343,16 +346,16 @@ main{flex:1;padding:14px 14px calc(var(--navh) + env(safe-area-inset-bottom) + 8
       <div class="ts" id="m-cur-ts"></div>
     </div>
   </div>
-  <div class="card collapsible" id="mob-alerts-card">
-    <div class="card-hdr"><span class="ctitle">Environmental Alerts</span><span class="badge" id="m-alerts-badge">—</span></div>
-    <div class="card-body"><div id="m-alerts-body"><div class="nodata">Waiting for data…</div></div></div>
-  </div>
   <div class="card collapsible collapsed" id="mob-log-card">
     <div class="card-hdr">
       <span class="ctitle">How I Feel</span>
       <button class="hbtn" id="m-export-btn" style="font-size:10px;padding:4px 9px">&#8595; Export</button>
     </div>
     <div class="card-body"><div id="log-body-m"></div></div>
+  </div>
+  <div class="card collapsible" id="mob-alerts-card">
+    <div class="card-hdr"><span class="ctitle">Environmental Alerts</span><span class="badge" id="m-alerts-badge">—</span></div>
+    <div class="card-body"><div id="m-alerts-body"><div class="nodata">Waiting for data…</div></div></div>
   </div>
   <div class="card collapsible collapsed" id="mob-poll-card">
     <div class="ldr" id="ldr-mpoll"><div class="spin"></div><div class="ldr-msg">Loading pollen…</div></div>
