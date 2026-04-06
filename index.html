@@ -1153,7 +1153,7 @@ function buildDailyRow(){
     if(pol){chips.push('🌿 Grass '+polCatName(pol.gi));chips.push('🌿 Tree '+polCatName(pol.ti));chips.push('🌿 Weed '+polCatName(pol.wi));}
     if(maxPm!=null)chips.push('💨 PM2.5 '+Math.round(maxPm)+' μg/m³ ('+omAQLabel(maxPm)+')');
     const fdData=makeFdData(name,p.shortForecast||'',chips);
-        html+='<div class="fd'+(i===0?' td':'')+(xa?' fa':xw?' fw':'')+'" '+dataAttrs+'><div class="fddot"></div>'
+        html+='<div class="fd'+(i===0?' td':'')+(xa?' fa':xw?' fw':'')+'" '+fdData+'><div class="fddot"></div>'
       +'<div class="fd-sect wx"><div class="fdn">'+name+'</div><div class="fdi">'+wxIcon+'</div><div class="fdh">'+hiD+'</div><div class="fdl">'+loD+'</div>'+prcpD+'</div>'
       +polHtml+aqHtml+'</div>';
   });
